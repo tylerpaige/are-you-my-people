@@ -5,15 +5,15 @@ import { getKeyDefinition, type Letter } from '../lib/config';
 defineProps<{
   loading: boolean;
   letters: Letter[];
-  getActivePlays: (keyCode: string) => { id: string; progress: number }[];
+  getActivePlays: (letter: Letter) => { id: string; progress: number }[];
 }>();
 
 const emit = defineEmits<{
-  play: [keyCode: string];
+  play: [letter: Letter];
 }>();
 
-function onPlay(keyCode: string) {
-  emit('play', keyCode);
+function onPlay(letter: Letter) {
+  emit('play', letter);
 }
 </script>
 
@@ -44,10 +44,8 @@ function onPlay(keyCode: string) {
         <Key
           :letter="getKeyDefinition(letter).letter"
           :label="getKeyDefinition(letter).label || letter"
-          :keyCode="getKeyDefinition(letter).keyCode"
           :active-plays="getActivePlays(letter)"
           :disabled="!getKeyDefinition(letter).soundUrl"
-          :is-space="false"
           class="col-span-1"
           @play="onPlay(letter)"
         />

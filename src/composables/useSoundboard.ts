@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue';
 import gsap from 'gsap';
-import { KEY_CONFIG } from '../lib/config';
+import { getKeyDefinition, KEY_CONFIG, Letter, LETTERS } from '../lib/config';
 
 export interface ActivePlay {
   id: string;
@@ -13,17 +13,15 @@ export function useSoundboard() {
   const progressById = reactive<Record<string, number>>({});
   const durationsByUrl = reactive<Record<string, number>>({});
 
-  const keyCodes = Object.keys(KEY_CONFIG);
-  keyCodes.forEach((code) => {
-    activePlaysByKey[code] = [];
+  LETTERS.forEach((letter) => {
+    activePlaysByKey[letter] = [];
   });
 
-  const keyCodesWithSound = keyCodes.filter((code) => KEY_CONFIG[code]?.soundUrl);
+  const lettersWithSound = Object.values(KEY_CONFIG).filter((config) => config.soundUrl);
 
   function preload() {
-    const promises = keyCodesWithSound.map((keyCode) => {
-      const config = KEY_CONFIG[keyCode];
-      const soundUrl = config?.soundUrl!;
+    const promises = lettersWithSound.map((definition) => {
+      const soundUrl = definition.soundUrl!;
       return new Promise<void>((resolve, reject) => {
         const audio = new Audio(soundUrl);
         audio.addEventListener(
@@ -52,21 +50,21 @@ export function useSoundboard() {
     });
   }
 
-  function play(keyCode: string): void {
-    const config = KEY_CONFIG[keyCode];
+  function play(letter: Letter): void {
+    const config = getKeyDefinition(letter);
     const soundUrl = config?.soundUrl;
     if (!config || !soundUrl) return;
 
     const duration = durationsByUrl[soundUrl] ?? 1;
 
     const audio = new Audio(soundUrl);
-    const id = `${keyCode}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const id = `${letter}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     progressById[id] = 0;
-    const plays = activePlaysByKey[keyCode];
+    const plays = activePlaysByKey[letter];
     if (plays) plays.push({ id });
 
     const remove = () => {
-      const arr = activePlaysByKey[keyCode];
+      const arr = activePlaysByKey[letter];
       if (arr) {
         const i = arr.findIndex((p) => p.id === id);
         if (i !== -1) arr.splice(i, 1);
@@ -85,8 +83,8 @@ export function useSoundboard() {
     });
   }
 
-  function getActivePlays(keyCode: string): ActivePlay[] {
-    const plays = activePlaysByKey[keyCode] ?? [];
+  function getActivePlays(letter: Letter): ActivePlay[] {
+    const plays = activePlaysByKey[letter] ?? [];
     return plays.map((p) => ({ id: p.id, progress: progressById[p.id] ?? 0 }));
   }
 

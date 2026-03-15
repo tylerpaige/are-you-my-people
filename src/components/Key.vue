@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import type { ActivePlay } from "../composables/useSoundboard";
+import type { Letter } from "../lib/config";
 
 withDefaults(
   defineProps<{
     label: string;
     sublabel?: string;
     activePlays?: ActivePlay[];
-    keyCode: string;
+    letter: Letter;
     disabled?: boolean;
   }>(),
-  { activePlays: () => [], keyCode: "", disabled: false },
+  { activePlays: () => [], letter: "A" as Letter, disabled: false },
 );
 
 defineEmits<{
-  play: [keyCode: string];
+  play: [letter: Letter];
 }>();
 </script>
 
@@ -22,7 +23,7 @@ defineEmits<{
     type="button"
     class="key-cap relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-gray-300 bg-gray-100 px-2 py-1.5 text-left shadow-sm transition hover:bg-gray-200 active:bg-gray-300 disabled:pointer-events-none disabled:opacity-50 md:px-3 md:py-2 "
     :disabled="disabled"
-    @click="$emit('play', keyCode)"
+    @click="$emit('play', letter)"
   >
     <span class="relative z-10 text-lg font-medium text-gray-800 md:text-xl">{{
       label

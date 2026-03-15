@@ -6,15 +6,15 @@ import { getKeyDefinition } from "../lib/config";
 defineProps<{
   loading: boolean;
   rows: Letter[][];
-  getActivePlays: (keyCode: string) => { id: string; progress: number }[];
+  getActivePlays: (letter: Letter) => { id: string; progress: number }[];
 }>();
 
 const emit = defineEmits<{
-  play: [keyCode: string];
+  play: [letter: Letter];
 }>();
 
-function onPlay(keyCode: string) {
-  emit("play", keyCode);
+function onPlay(letter: Letter) {
+  emit("play", letter);
 }
 </script>
 
@@ -52,13 +52,12 @@ function onPlay(keyCode: string) {
             v-for="letter in row"
             :key="letter"
             :letter="getKeyDefinition(letter).letter"
-            :keyCode="getKeyDefinition(letter).keyCode"
             :label="getKeyDefinition(letter).label || letter"
             :sublabel="getKeyDefinition(letter).label ? letter : undefined"
-            :active-plays="getActivePlays(getKeyDefinition(letter).keyCode)"
+            :active-plays="getActivePlays(getKeyDefinition(letter).letter)"
             :disabled="!getKeyDefinition(letter).soundUrl"
             class="col-span-1 only:col-span-5 aspect-square only:aspect-[5/1]"
-            @play="onPlay(getKeyDefinition(letter).keyCode)"
+            @play="onPlay(getKeyDefinition(letter).letter)"
           />
         </div>
       </template>

@@ -13,7 +13,7 @@ function handleKeydown(e: KeyboardEvent) {
   console.log('handleKeydown', keyCode, definition);
   if (definition?.soundUrl) {
     console.log('playing', keyCode);
-    play(definition.keyCode);
+    play(definition.letter);
     e.preventDefault();
   }
 }

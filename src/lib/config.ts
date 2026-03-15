@@ -100,7 +100,28 @@ export const KEY_CONFIG: KeyConfig = {
     ...BARE_KEYS.L,
     label: "😂",
     soundUrl: "/sounds/big-laugh.wav",
-  }
+  },
+  W: {
+    ...BARE_KEYS.W,
+    label: "🧙‍♀️",
+    soundUrl: "/sounds/witch.wav",
+  },
+  E: {
+    ...BARE_KEYS.E,
+    label: "🚨",
+    soundUrl: "/sounds/buzzer.wav",
+  },
+  R: {
+    ...BARE_KEYS.R,
+    label: "⚠️",
+    soundUrl: "/sounds/warning-alarm.wav",
+  },
+  T: {
+    ...BARE_KEYS.T,
+    label: "👩‍🎤",
+    soundUrl: "/sounds/shade.wav",
+  },
+
 };
 
 export const KEY_CODE_TO_DEFINITION = new Map<string, KeyDefinition>(
