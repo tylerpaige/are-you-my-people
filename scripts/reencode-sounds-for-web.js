@@ -25,12 +25,48 @@ const WEB_WAV_ARGS = [
   null,           // output (set per file)
 ];
 
+const TARGET_CODEC = 'pcm_s16le';
+const TARGET_SAMPLE_RATE = 44100;
+const TARGET_CHANNELS = 2;
+
 function checkFfmpeg() {
   try {
     execFileSync('ffmpeg', ['-version'], { stdio: 'pipe' });
   } catch (e) {
     console.error('This script requires ffmpeg. Install it (e.g. apt-get install ffmpeg in the devcontainer) and try again.');
     process.exit(1);
+  }
+}
+
+/**
+ * Returns true if the file is already in web-safe format: 16-bit PCM, 44.1kHz, stereo.
+ * Uses ffprobe to inspect the first audio stream without decoding.
+ */
+function needsReencode(inputPath) {
+  try {
+    const out = execFileSync('ffprobe', [
+      '-v', 'quiet',
+      '-print_format', 'json',
+      '-show_streams',
+      '-select_streams', 'a:0',
+      inputPath,
+    ], { encoding: 'utf-8', maxBuffer: 1024 * 1024 });
+    const data = JSON.parse(out);
+    const stream = data?.streams?.[0];
+    if (!stream) return true;
+
+    const codec = (stream.codec_name || '').toLowerCase();
+    const sampleRate = parseInt(stream.sample_rate, 10) || 0;
+    const channels = parseInt(stream.channels, 10) || 0;
+
+    const alreadyWebSafe =
+      codec === TARGET_CODEC &&
+      sampleRate === TARGET_SAMPLE_RATE &&
+      channels === TARGET_CHANNELS;
+
+    return !alreadyWebSafe;
+  } catch (e) {
+    return true;
   }
 }
 
@@ -68,10 +104,14 @@ function main() {
   }
 
   for (const inputPath of audioFiles) {
+    if (!needsReencode(inputPath)) {
+      console.log('Skip (already web-safe):', path.basename(inputPath));
+      continue;
+    }
     reencodeFile(inputPath);
   }
 
-  console.log('Done. All files are now 16-bit PCM WAV at 44.1kHz stereo.');
+  console.log('Done. Only files that needed it were re-encoded to 16-bit PCM WAV at 44.1kHz stereo.');
 }
 
 main();
