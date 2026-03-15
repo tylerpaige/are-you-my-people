@@ -1,134 +1,27 @@
-/**
- * Key definitions: keyCode (for KeyboardEvent.code), letter, label.
- * If soundUrl is present, the key is enabled; otherwise it is disabled.
- */
-export type Letter =
-  | "A"
-  | "B"
-  | "C"
-  | "D"
-  | "E"
-  | "F"
-  | "G"
-  | "H"
-  | "I"
-  | "J"
-  | "K"
-  | "L"
-  | "M"
-  | "N"
-  | "O"
-  | "P"
-  | "Q"
-  | "R"
-  | "S"
-  | "T"
-  | "U"
-  | "V"
-  | "W"
-  | "X"
-  | "Y"
-  | "Z"
-  | "Space";
-export interface KeyDefinition {
-  keyCode: string;
-  letter: Letter;
-  label?: string;
-  soundUrl?: string;
-}
-export type KeyConfig = Record<Letter, KeyDefinition>;
+import type { KeyDefinition, KeyConfig, Letter } from "./types";
+import { createBareKeyConfig } from "./keySetup";
 
-export const LETTERS = [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "K",
-  "L",
-  "M",
-  "N",
-  "O",
-  "P",
-  "Q",
-  "R",
-  "S",
-  "T",
-  "U",
-  "V",
-  "W",
-  "X",
-  "Y",
-  "Z",
-  "Space",
-] satisfies Letter[];
+// Re-export types and bare setup for consumers that import from config
+export type { Letter, KeyDefinition, KeyConfig } from "./types";
+export { LETTERS } from "./keySetup";
 
-// The basic key config is a map of letters to their key code and label.
-// It does not have any sound URLs, meaning all keys are disabled by default.
-const BARE_KEYS: KeyConfig = Object.fromEntries(
-  LETTERS.map((letter) => [
-    letter,
-    { keyCode: letter === "Space" ? "Space" : `Key${letter}`, letter },
-  ]),
-) as KeyConfig;
+const BARE_KEYS = createBareKeyConfig();
 
-// The full key config is the basic key config with keys overridden to
-// provide content.
+/** Full key config: bare keys plus labels and sound URLs for enabled keys. */
 export const KEY_CONFIG: KeyConfig = {
   ...BARE_KEYS,
-  C: {
-    ...BARE_KEYS.C,
-    label: "🤡",
-    soundUrl: "/sounds/circus.wav",
-  },
-  Q: {
-    ...BARE_KEYS.Q,
-    label: "🎷",
-    soundUrl: "/sounds/yakity-yak.wav",
-  },
-  A: {
-    ...BARE_KEYS.A,
-    label: "😬",
-    soundUrl: "/sounds/awkward.wav",
-  },
-  L: {
-    ...BARE_KEYS.L,
-    label: "😂",
-    soundUrl: "/sounds/big-laugh.wav",
-  },
-  W: {
-    ...BARE_KEYS.W,
-    label: "🧙‍♀️",
-    soundUrl: "/sounds/witch.wav",
-  },
-  E: {
-    ...BARE_KEYS.E,
-    label: "🚨",
-    soundUrl: "/sounds/buzzer.wav",
-  },
-  R: {
-    ...BARE_KEYS.R,
-    label: "⚠️",
-    soundUrl: "/sounds/warning-alarm.wav",
-  },
-  T: {
-    ...BARE_KEYS.T,
-    label: "👩‍🎤",
-    soundUrl: "/sounds/shade.wav",
-  },
-
+  C: { ...BARE_KEYS.C, label: "🤡", soundUrl: "/sounds/circus.wav" },
+  Q: { ...BARE_KEYS.Q, label: "🎷", soundUrl: "/sounds/yakity-yak.wav" },
+  A: { ...BARE_KEYS.A, label: "😬", soundUrl: "/sounds/awkward.wav" },
+  L: { ...BARE_KEYS.L, label: "😂", soundUrl: "/sounds/big-laugh.wav" },
+  W: { ...BARE_KEYS.W, label: "🧙‍♀️", soundUrl: "/sounds/witch.wav" },
+  E: { ...BARE_KEYS.E, label: "🚨", soundUrl: "/sounds/buzzer.wav" },
+  R: { ...BARE_KEYS.R, label: "⚠️", soundUrl: "/sounds/warning-alarm.wav" },
+  T: { ...BARE_KEYS.T, label: "👩‍🎤", soundUrl: "/sounds/shade.wav" },
 };
 
 export const KEY_CODE_TO_DEFINITION = new Map<string, KeyDefinition>(
-  Object.entries(KEY_CONFIG).map(([_letter, definition]) => [
-    definition.keyCode,
-    definition,
-  ]),
+  Object.values(KEY_CONFIG).map((def) => [def.keyCode, def]),
 );
 
 export const QWERTY_ROWS: Letter[][] = [
@@ -138,10 +31,8 @@ export const QWERTY_ROWS: Letter[][] = [
   ["Space"],
 ];
 
-export const getKeyDefinition = (letter: Letter): KeyDefinition => {
+export function getKeyDefinition(letter: Letter): KeyDefinition {
   const definition = KEY_CONFIG[letter];
-  if (!definition) {
-    throw new Error(`Key definition not found for letter: ${letter}`);
-  }
+  if (!definition) throw new Error(`Key definition not found for letter: ${letter}`);
   return definition;
-};
+}
