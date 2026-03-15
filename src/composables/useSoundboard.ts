@@ -29,7 +29,9 @@ export function useSoundboard() {
     activePlaysByKey[letter] = [];
   });
 
-  const lettersWithSound = Object.values(KEY_CONFIG).filter((config) => config.soundUrl);
+  const lettersWithSound = Object.values(KEY_CONFIG).filter(
+    (config) => config.soundUrl
+  );
 
   function preload() {
     const promises = lettersWithSound.map((definition) => {
@@ -114,8 +116,8 @@ export function useSoundboard() {
       if (fadeDurationSec <= 0) {
         entry.audio.pause();
         entry.progressTween.kill();
-        const idx = activePlaysByKey[letter].findIndex((p) => p.id === entry.id);
-        if (idx !== -1) activePlaysByKey[letter].splice(idx, 1);
+        const idx = plays.findIndex((p) => p.id === entry.id);
+        if (idx !== -1) plays.splice(idx, 1);
         delete progressById[entry.id];
         delete fadeOutProgressById[entry.id];
         return;
@@ -127,7 +129,7 @@ export function useSoundboard() {
       const remove = () => {
         const arr = activePlaysByKey[letter];
         const i = arr?.findIndex((p) => p.id === entry.id);
-        if (i !== -1) arr.splice(i, 1);
+        if (arr != null && i !== undefined && i !== -1) arr.splice(i, 1);
         entry.audio.pause();
         delete progressById[entry.id];
         delete fadeOutProgressById[entry.id];

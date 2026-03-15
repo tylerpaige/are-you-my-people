@@ -21,18 +21,30 @@ const riffSize = 36 + dataSize;
 
 const header = Buffer.alloc(44);
 let offset = 0;
-header.write('RIFF', offset); offset += 4;
-header.writeUInt32LE(riffSize, offset); offset += 4;
-header.write('WAVE', offset); offset += 4;
-header.write('fmt ', offset); offset += 4;
-header.writeUInt32LE(16, offset); offset += 4;
-header.writeUInt16LE(1, offset); offset += 2;  // PCM
-header.writeUInt16LE(numChannels, offset); offset += 2;
-header.writeUInt32LE(sampleRate, offset); offset += 4;
-header.writeUInt32LE(byteRate, offset); offset += 4;
-header.writeUInt16LE(blockAlign, offset); offset += 2;
-header.writeUInt16LE(bitsPerSample, offset); offset += 2;
-header.write('data', offset); offset += 4;
+header.write('RIFF', offset);
+offset += 4;
+header.writeUInt32LE(riffSize, offset);
+offset += 4;
+header.write('WAVE', offset);
+offset += 4;
+header.write('fmt ', offset);
+offset += 4;
+header.writeUInt32LE(16, offset);
+offset += 4;
+header.writeUInt16LE(1, offset);
+offset += 2; // PCM
+header.writeUInt16LE(numChannels, offset);
+offset += 2;
+header.writeUInt32LE(sampleRate, offset);
+offset += 4;
+header.writeUInt32LE(byteRate, offset);
+offset += 4;
+header.writeUInt16LE(blockAlign, offset);
+offset += 2;
+header.writeUInt16LE(bitsPerSample, offset);
+offset += 2;
+header.write('data', offset);
+offset += 4;
 header.writeUInt32LE(dataSize, offset);
 
 const data = Buffer.alloc(dataSize, 0);

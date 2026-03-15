@@ -1,1 +1,1 @@
-{"root":["./src/main.ts","./src/vite-env.d.ts","./src/composables/usesoundboard.ts","./src/lib/keys.ts","./src/app.vue","./src/components/helloworld.vue","./src/components/key.vue","./src/components/keyboard.vue","./src/components/mobilesoundgrid.vue"],"version":"5.9.3"}
+{"root":["./src/main.ts","./src/vite-env.d.ts","./src/composables/useSoundboard.ts","./src/lib/config.ts","./src/lib/keySetup.ts","./src/lib/types.ts","./src/App.vue","./src/components/Key.vue","./src/components/Keyboard.vue","./src/components/MobileSoundGrid.vue"],"version":"5.9.3"}

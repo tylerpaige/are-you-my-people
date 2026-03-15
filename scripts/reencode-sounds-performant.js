@@ -52,7 +52,10 @@ function getMtime(filePath) {
 
 function safeOutputPath(inputPath, desiredPath) {
   if (path.resolve(inputPath) === path.resolve(desiredPath)) {
-    return path.join(path.dirname(desiredPath), '.tmp-' + path.basename(desiredPath));
+    return path.join(
+      path.dirname(desiredPath),
+      '.tmp-' + path.basename(desiredPath)
+    );
   }
   return desiredPath;
 }
@@ -106,10 +109,7 @@ function main() {
   const entries = fs.readdirSync(SOUNDS_DIR, { withFileTypes: true });
   const audioFiles = entries
     .filter(
-      (e) =>
-        e.isFile() &&
-        !e.name.startsWith('.') &&
-        SOURCE_EXT.test(e.name)
+      (e) => e.isFile() && !e.name.startsWith('.') && SOURCE_EXT.test(e.name)
     )
     .map((e) => path.join(SOUNDS_DIR, e.name));
 
@@ -139,11 +139,19 @@ function main() {
     }
 
     try {
-      if (!SKIP_EXISTING || !fs.existsSync(oggPath) || getMtime(oggPath) < inputMtime) {
+      if (
+        !SKIP_EXISTING ||
+        !fs.existsSync(oggPath) ||
+        getMtime(oggPath) < inputMtime
+      ) {
         encodeOgg(inputPath, oggPath);
         console.log('OGG:', base, '->', path.basename(oggPath));
       }
-      if (!SKIP_EXISTING || !fs.existsSync(mp3Path) || getMtime(mp3Path) < inputMtime) {
+      if (
+        !SKIP_EXISTING ||
+        !fs.existsSync(mp3Path) ||
+        getMtime(mp3Path) < inputMtime
+      ) {
         encodeMp3(inputPath, mp3Path);
         console.log('MP3:', base, '->', path.basename(mp3Path));
       }

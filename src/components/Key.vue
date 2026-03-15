@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ActivePlay } from "../composables/useSoundboard";
-import type { Letter } from "../lib/config";
+import type { ActivePlay } from '../composables/useSoundboard';
+import type { Letter } from '../lib/config';
 
 const props = withDefaults(
   defineProps<{
@@ -12,7 +12,13 @@ const props = withDefaults(
     shiftHeld?: boolean;
     centerLabel?: boolean;
   }>(),
-  { activePlays: () => [], letter: "A" as Letter, disabled: false, shiftHeld: false, centerLabel: false },
+  {
+    activePlays: () => [],
+    letter: 'A' as Letter,
+    disabled: false,
+    shiftHeld: false,
+    centerLabel: false,
+  }
 );
 
 const emit = defineEmits<{
@@ -50,17 +56,23 @@ function onClick(e: MouseEvent) {
     @click="onClick"
   >
     <template v-if="props.letter === 'Space' && props.shiftHeld">
-      <span class="relative z-10 text-center text-sm font-medium md:text-base" style="color: #1a1a1a">
+      <span
+        class="relative z-10 text-center text-sm font-medium md:text-base"
+        style="color: #1a1a1a"
+      >
         Stop all sounds
       </span>
     </template>
     <template v-else>
-      <span class="relative z-10 font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none">{{
-        label
-      }}</span>
-      <span v-if="sublabel && !(shiftHeld && !disabled)" class="relative z-10 truncate text-xs text-gray-500">{{
-        sublabel
-      }}</span>
+      <span
+        class="relative z-10 font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none"
+        >{{ label }}</span
+      >
+      <span
+        v-if="sublabel && !(shiftHeld && !disabled)"
+        class="relative z-10 truncate text-xs text-gray-500"
+        >{{ sublabel }}</span
+      >
       <span
         v-if="shiftHeld && !disabled"
         class="relative z-10 text-xs font-medium"

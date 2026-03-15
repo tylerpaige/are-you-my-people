@@ -17,12 +17,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const soundsDir = path.join(__dirname, '..', 'public', 'sounds');
 
 const WEB_WAV_ARGS = [
-  '-y',           // overwrite
-  '-i', null,     // input (set per file)
-  '-acodec', 'pcm_s16le',
-  '-ar', '44100',
-  '-ac', '2',     // stereo
-  null,           // output (set per file)
+  '-y', // overwrite
+  '-i',
+  null, // input (set per file)
+  '-acodec',
+  'pcm_s16le',
+  '-ar',
+  '44100',
+  '-ac',
+  '2', // stereo
+  null, // output (set per file)
 ];
 
 const TARGET_CODEC = 'pcm_s16le';
@@ -33,7 +37,9 @@ function checkFfmpeg() {
   try {
     execFileSync('ffmpeg', ['-version'], { stdio: 'pipe' });
   } catch (e) {
-    console.error('This script requires ffmpeg. Install it (e.g. apt-get install ffmpeg in the devcontainer) and try again.');
+    console.error(
+      'This script requires ffmpeg. Install it (e.g. apt-get install ffmpeg in the devcontainer) and try again.'
+    );
     process.exit(1);
   }
 }
@@ -44,13 +50,20 @@ function checkFfmpeg() {
  */
 function needsReencode(inputPath) {
   try {
-    const out = execFileSync('ffprobe', [
-      '-v', 'quiet',
-      '-print_format', 'json',
-      '-show_streams',
-      '-select_streams', 'a:0',
-      inputPath,
-    ], { encoding: 'utf-8', maxBuffer: 1024 * 1024 });
+    const out = execFileSync(
+      'ffprobe',
+      [
+        '-v',
+        'quiet',
+        '-print_format',
+        'json',
+        '-show_streams',
+        '-select_streams',
+        'a:0',
+        inputPath,
+      ],
+      { encoding: 'utf-8', maxBuffer: 1024 * 1024 }
+    );
     const data = JSON.parse(out);
     const stream = data?.streams?.[0];
     if (!stream) return true;
@@ -95,7 +108,12 @@ function main() {
 
   const entries = fs.readdirSync(soundsDir, { withFileTypes: true });
   const audioFiles = entries
-    .filter((e) => e.isFile() && !e.name.startsWith('.reencode') && /\.(wav|mp3|ogg|m4a|flac)$/i.test(e.name))
+    .filter(
+      (e) =>
+        e.isFile() &&
+        !e.name.startsWith('.reencode') &&
+        /\.(wav|mp3|ogg|m4a|flac)$/i.test(e.name)
+    )
     .map((e) => path.join(soundsDir, e.name));
 
   if (audioFiles.length === 0) {
@@ -111,7 +129,9 @@ function main() {
     reencodeFile(inputPath);
   }
 
-  console.log('Done. Only files that needed it were re-encoded to 16-bit PCM WAV at 44.1kHz stereo.');
+  console.log(
+    'Done. Only files that needed it were re-encoded to 16-bit PCM WAV at 44.1kHz stereo.'
+  );
 }
 
 main();
