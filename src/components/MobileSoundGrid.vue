@@ -1,24 +1,38 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import Key from './Key.vue';
-import { getKeyDefinition, type Letter } from '../lib/config';
+import { getKeyDefinition, QWERTY_ROWS, type Letter } from '../lib/config';
 
-defineProps<{
+const props = defineProps<{
   loading: boolean;
-  letters: Letter[];
-  getActivePlays: (letter: Letter) => { id: string; progress: number }[];
+  shiftHeld: boolean;
+  hasAnyActivePlays: boolean;
+  getActivePlays: (
+    letter: Letter
+  ) => { id: string; progress: number; fadeOutProgress?: number }[];
 }>();
 
 const emit = defineEmits<{
   play: [letter: Letter];
+  stop: [letter: Letter];
 }>();
+
+/** Keys in QWERTY order (row by row), excluding Space (fixed bar). */
+const lettersInQwertyOrder = computed(() =>
+  QWERTY_ROWS.flat().filter((l) => l !== 'Space')
+);
 
 function onPlay(letter: Letter) {
   emit('play', letter);
 }
+
+function onStop(letter: Letter) {
+  emit('stop', letter);
+}
 </script>
 
 <template>
-  <div class="relative w-full">
+  <div class="relative w-full" :class="props.hasAnyActivePlays && 'pb-14'">
     <!-- Loading overlay -->
     <div
       v-if="loading"
@@ -33,23 +47,65 @@ function onPlay(letter: Letter) {
       <p class="text-sm font-medium text-gray-600">Loading sounds…</p>
     </div>
 
+    <!-- 4 square keys per row; label/sublabel centered; fadeout inset bottom-right at 1/4 size -->
     <div
-      class="grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-4"
+      class="grid grid-cols-4 gap-3"
       :class="loading && 'pointer-events-none opacity-60'"
     >
-      <template
-        v-for="letter in letters"
-        :key="letter"
-      >
-        <Key
-          :letter="getKeyDefinition(letter).letter"
-          :label="getKeyDefinition(letter).label || letter"
-          :active-plays="getActivePlays(letter)"
-          :disabled="!getKeyDefinition(letter).soundUrl"
-          class="col-span-1"
-          @play="onPlay(letter)"
-        />
+      <template v-for="letter in lettersInQwertyOrder" :key="letter">
+        <div class="relative aspect-square">
+          <Key
+            :letter="getKeyDefinition(letter).letter"
+            :label="getKeyDefinition(letter).label || letter"
+            :active-plays="getActivePlays(letter)"
+            :disabled="!getKeyDefinition(letter).soundUrl"
+            :shift-held="shiftHeld"
+            center-label
+            class="absolute inset-0 h-full w-full rounded-lg"
+            @play="onPlay(letter)"
+            @stop="onStop(letter)"
+          />
+          <button
+            v-if="getKeyDefinition(letter).soundUrl"
+            type="button"
+            class="absolute bottom-1 right-1 flex h-1/4 w-1/4 items-center justify-center p-0.5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-0"
+            :aria-label="
+              getActivePlays(letter).length > 0
+                ? `Stop ${letter}`
+                : `Stop ${letter}; no sound playing`
+            "
+            @click.stop="onStop(letter)"
+          >
+            <svg
+              class="h-full w-full"
+              :class="getActivePlays(letter).length > 0 ? 'opacity-100 text-red-500' : 'opacity-0'"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden
+            >
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" />
+              <rect x="8" y="8" width="8" height="8" fill="currentColor" />
+            </svg>
+          </button>
+        </div>
       </template>
+    </div>
+
+    <!-- Fixed bottom: Stop all sounds (mobile only), only when something is playing -->
+    <div
+      v-if="props.hasAnyActivePlays"
+      class="fixed bottom-0 left-0 right-0 z-10 flex h-14 items-center justify-center border-t border-gray-200 bg-yellow-100 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]"
+    >
+      <button
+        type="button"
+        class="h-full w-full font-medium text-yellow-900 transition hover:bg-yellow-200 active:bg-yellow-300"
+        aria-label="Stop all sounds"
+        @click="onStop('Space')"
+      >
+        Stop all sounds
+      </button>
     </div>
   </div>
 </template>

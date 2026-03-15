@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Letter } from "../lib/config";
-import Key from "./Key.vue";
-import { getKeyDefinition } from "../lib/config";
+import type { Letter } from '../lib/config';
+import Key from './Key.vue';
+import { getKeyDefinition } from '../lib/config';
 
 defineProps<{
   loading: boolean;
@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>();
 
 function onPlay(letter: Letter) {
-  emit("play", letter);
+  emit('play', letter);
 }
 </script>
 
