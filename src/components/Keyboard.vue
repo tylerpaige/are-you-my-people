@@ -61,7 +61,9 @@ function onStop(letter: Letter) {
             :label="getKeyDefinition(letter).label || letter"
             :sublabel="getKeyDefinition(letter).label ? letter : undefined"
             :active-plays="getActivePlays(getKeyDefinition(letter).letter)"
-            :disabled="letter === 'Space' ? false : !getKeyDefinition(letter).soundUrl"
+            :disabled="
+              letter === 'Space' ? false : !getKeyDefinition(letter).soundUrl
+            "
             :shift-held="shiftHeld"
             class="col-span-1 only:col-span-5 aspect-square only:aspect-[5/1]"
             @play="onPlay(getKeyDefinition(letter).letter)"
@@ -69,6 +71,14 @@ function onStop(letter: Letter) {
           />
         </div>
       </template>
+    </div>
+    <div class="mt-16 text-sm leading-tight text-yellow/80 max-w-sm mx-auto">
+      <h2 class="text-md font-bold underline mb-1">Instructions</h2>
+      <p class="">
+        Click a button or use the keyboard to play sounds. Repeat clicks trigger
+        multiple plays. Hold <span class="font-bold">shift</span> to silence a
+        sound. Press <span class="font-bold">escape</span> to stop all sounds.
+      </p>
     </div>
   </div>
 </template>

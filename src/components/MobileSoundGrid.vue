@@ -33,6 +33,16 @@ function onStop(letter: Letter) {
 
 <template>
   <div class="relative w-full" :class="props.hasAnyActivePlays && 'pb-14'">
+    <div
+      class="mt-8 mb-8 text-sm leading-tight text-yellow/80 max-w-sm mx-auto"
+    >
+      <h2 class="text-md font-bold underline mb-1">Instructions</h2>
+      <p class="">
+        Click a button. Repeat clicks trigger multiple plays. When a sound is
+        playing, a stop button will appear.
+      </p>
+    </div>
+
     <!-- Loading overlay -->
     <div
       v-if="loading"
@@ -78,14 +88,24 @@ function onStop(letter: Letter) {
           >
             <svg
               class="h-full w-full"
-              :class="getActivePlays(letter).length > 0 ? 'opacity-100 text-red-500' : 'opacity-0'"
+              :class="
+                getActivePlays(letter).length > 0
+                  ? 'opacity-100 text-red-500'
+                  : 'opacity-0'
+              "
               viewBox="0 0 24 24"
               fill="currentColor"
               stroke="currentColor"
               stroke-width="2"
               aria-hidden
             >
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                fill="none"
+                stroke="currentColor"
+              />
               <rect x="8" y="8" width="8" height="8" fill="currentColor" />
             </svg>
           </button>
