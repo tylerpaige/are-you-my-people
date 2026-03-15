@@ -12,7 +12,8 @@ function handleKeydown(e: KeyboardEvent) {
   const definition = KEY_CODE_TO_DEFINITION.get(keyCode);
   console.log('handleKeydown', keyCode, definition);
   if (definition?.soundUrl) {
-    play(keyCode);
+    console.log('playing', keyCode);
+    play(definition.keyCode);
     e.preventDefault();
   }
 }

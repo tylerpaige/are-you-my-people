@@ -90,6 +90,16 @@ export const KEY_CONFIG: KeyConfig = {
     ...BARE_KEYS.Q,
     label: "🎷",
     soundUrl: "/sounds/yakity-yak.wav",
+  },
+  A: {
+    ...BARE_KEYS.A,
+    label: "😬",
+    soundUrl: "/sounds/awkward.wav",
+  },
+  L: {
+    ...BARE_KEYS.L,
+    label: "😂",
+    soundUrl: "/sounds/big-laugh.wav",
   }
 };
 
