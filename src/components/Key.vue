@@ -32,14 +32,12 @@ function onClick(e: MouseEvent) {
 <template>
   <button
     type="button"
-    class="key-cap relative flex flex-col items-center justify-center overflow-hidden rounded-lg border px-2 py-1.5 shadow-sm transition disabled:pointer-events-none disabled:opacity-50 md:px-3 md:py-2"
+    class="key-cap relative flex flex-col items-center justify-center overflow-hidden rounded-lg border px-2 py-1.5 shadow-sm transition disabled:pointer-events-none disabled:opacity-50 md:px-3 md:py-2 [container-type:size]"
     :class="[
       centerLabel ? 'text-center' : 'text-left',
-      props.letter === 'Space' && props.shiftHeld
-        ? 'border-yellow-500 bg-yellow-100 hover:bg-yellow-200 active:bg-yellow-300 ring-2 ring-yellow-500/50'
-        : shiftHeld && !disabled
-          ? 'border-amber-500 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 ring-2 ring-amber-500/50'
-          : 'border-gray-300 bg-gray-100 hover:bg-gray-200 active:bg-gray-300',
+      shiftHeld && !disabled
+        ? 'border-key-shift bg-key-shift hover:bg-key-shift/90 active:bg-key-shift/80 ring-2 ring-key-shift/50'
+        : 'border-gray-300 bg-key-bg hover:bg-key-bg/90 active:bg-key-bg/80',
     ]"
     :disabled="disabled"
     :title="
@@ -52,12 +50,12 @@ function onClick(e: MouseEvent) {
     @click="onClick"
   >
     <template v-if="props.letter === 'Space' && props.shiftHeld">
-      <span class="relative z-10 text-center text-sm font-medium text-yellow-800 md:text-base">
+      <span class="relative z-10 text-center text-sm font-medium md:text-base" style="color: #1a1a1a">
         Stop all sounds
       </span>
     </template>
     <template v-else>
-      <span class="relative z-10 text-lg font-medium text-gray-800 md:text-xl">{{
+      <span class="relative z-10 font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none">{{
         label
       }}</span>
       <span v-if="sublabel && !(shiftHeld && !disabled)" class="relative z-10 truncate text-xs text-gray-500">{{
@@ -65,7 +63,8 @@ function onClick(e: MouseEvent) {
       }}</span>
       <span
         v-if="shiftHeld && !disabled"
-        class="relative z-10 text-xs font-medium text-amber-700"
+        class="relative z-10 text-xs font-medium"
+        style="color: #1a1a1a"
       >
         Silence
       </span>

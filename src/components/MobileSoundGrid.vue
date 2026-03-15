@@ -68,7 +68,7 @@ function onStop(letter: Letter) {
           <button
             v-if="getKeyDefinition(letter).soundUrl"
             type="button"
-            class="absolute bottom-1 right-1 flex h-1/4 w-1/4 items-center justify-center p-0.5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-0"
+            class="absolute bottom-1 right-1 z-10 flex min-h-9 min-w-9 items-center justify-center rounded-md p-1.5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-0 [height:max(2.25rem,33%)] [width:max(2.25rem,33%)]"
             :aria-label="
               getActivePlays(letter).length > 0
                 ? `Stop ${letter}`
@@ -96,11 +96,12 @@ function onStop(letter: Letter) {
     <!-- Fixed bottom: Stop all sounds (mobile only), only when something is playing -->
     <div
       v-if="props.hasAnyActivePlays"
-      class="fixed bottom-0 left-0 right-0 z-10 flex h-14 items-center justify-center border-t border-gray-200 bg-yellow-100 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]"
+      class="fixed bottom-0 left-0 right-0 z-10 flex h-14 items-center justify-center border-t border-key-shift bg-key-shift shadow-[0_-2px_8px_rgba(0,0,0,0.08)]"
     >
       <button
         type="button"
-        class="h-full w-full font-medium text-yellow-900 transition hover:bg-yellow-200 active:bg-yellow-300"
+        class="h-full w-full font-medium transition hover:bg-key-shift/90 active:bg-key-shift/80"
+        style="color: #1a1a1a"
         aria-label="Stop all sounds"
         @click="onStop('Space')"
       >

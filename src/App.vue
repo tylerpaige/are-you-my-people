@@ -5,8 +5,15 @@ import MobileSoundGrid from './components/MobileSoundGrid.vue';
 import { useSoundboard } from './composables/useSoundboard';
 import { KEY_CODE_TO_DEFINITION, QWERTY_ROWS, type Letter } from './lib/config';
 
-const { loading, preload, play, fadeOut, fadeOutAll, getActivePlays, hasAnyActivePlays } =
-  useSoundboard();
+const {
+  loading,
+  preload,
+  play,
+  fadeOut,
+  fadeOutAll,
+  getActivePlays,
+  hasAnyActivePlays,
+} = useSoundboard();
 const shiftHeld = ref(false);
 
 function handleKeydown(e: KeyboardEvent) {
@@ -62,11 +69,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 px-4 py-6">
-    <h1
-      class="mb-6 text-center text-2xl font-semibold text-gray-800 md:text-3xl"
-    >
-      Are you my people?
+  <div class="min-h-screen bg-brown px-4 py-6">
+    <h1 class="font-ranchers mb-6 text-center text-2xl md:text-4xl">
+      <span class="text-blue">Are</span
+      ><span class="text-red text-[2em]">You</span>
+      <br />
+      <span
+        class="text-green inline-block text-[0.7em]"
+        style="position: relative; top: -0.4em"
+        >My</span
+      >
+      <span class="text-yellow"> People?</span>
     </h1>
 
     <!-- Desktop: keyboard -->

@@ -6,15 +6,21 @@ import { getKeyDefinition } from '../lib/config';
 defineProps<{
   loading: boolean;
   rows: Letter[][];
+  shiftHeld: boolean;
   getActivePlays: (letter: Letter) => { id: string; progress: number }[];
 }>();
 
 const emit = defineEmits<{
   play: [letter: Letter];
+  stop: [letter: Letter];
 }>();
 
 function onPlay(letter: Letter) {
   emit('play', letter);
+}
+
+function onStop(letter: Letter) {
+  emit('stop', letter);
 }
 </script>
 
@@ -55,9 +61,11 @@ function onPlay(letter: Letter) {
             :label="getKeyDefinition(letter).label || letter"
             :sublabel="getKeyDefinition(letter).label ? letter : undefined"
             :active-plays="getActivePlays(getKeyDefinition(letter).letter)"
-            :disabled="!getKeyDefinition(letter).soundUrl"
+            :disabled="letter === 'Space' ? false : !getKeyDefinition(letter).soundUrl"
+            :shift-held="shiftHeld"
             class="col-span-1 only:col-span-5 aspect-square only:aspect-[5/1]"
             @play="onPlay(getKeyDefinition(letter).letter)"
+            @stop="onStop(getKeyDefinition(letter).letter)"
           />
         </div>
       </template>
