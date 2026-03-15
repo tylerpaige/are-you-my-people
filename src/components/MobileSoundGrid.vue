@@ -6,7 +6,6 @@ import { getKeyDefinition, QWERTY_ROWS, type Letter } from '../lib/config';
 const props = defineProps<{
   loading: boolean;
   shiftHeld: boolean;
-  hasAnyActivePlays: boolean;
   getActivePlays: (
     letter: Letter
   ) => { id: string; progress: number; fadeOutProgress?: number }[];
@@ -32,7 +31,7 @@ function onStop(letter: Letter) {
 </script>
 
 <template>
-  <div class="relative w-full" :class="props.hasAnyActivePlays && 'pb-14'">
+  <div class="relative w-full">
     <div
       class="mt-8 mb-8 text-sm leading-tight text-yellow/80 max-w-sm mx-auto"
     >
@@ -113,19 +112,52 @@ function onStop(letter: Letter) {
       </template>
     </div>
 
-    <!-- Fixed bottom: Stop all sounds (mobile only), only when something is playing -->
-    <div
-      v-if="props.hasAnyActivePlays"
-      class="fixed bottom-0 left-0 right-0 z-10 flex h-14 items-center justify-center border-t border-key-shift bg-key-shift shadow-[0_-2px_8px_rgba(0,0,0,0.08)]"
-    >
+    <!-- Space bar: main sound (full width, like desktop space key) -->
+    <div class="relative mt-3">
+      <Key
+        :letter="getKeyDefinition('Space').letter"
+        :label="getKeyDefinition('Space').label || 'Space'"
+        :active-plays="getActivePlays('Space')"
+        :disabled="!getKeyDefinition('Space').soundUrl"
+        :shift-held="shiftHeld"
+        center-label
+        class="h-14 w-full rounded-lg"
+        @play="onPlay('Space')"
+        @stop="onStop('Space')"
+      />
       <button
+        v-if="getKeyDefinition('Space').soundUrl"
         type="button"
-        class="h-full w-full font-medium transition hover:bg-key-shift/90 active:bg-key-shift/80"
-        style="color: #1a1a1a"
-        aria-label="Stop all sounds"
-        @click="onStop('Space')"
+        class="absolute bottom-1 right-1 z-10 flex min-h-9 min-w-9 items-center justify-center rounded-md p-1.5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-0"
+        :aria-label="
+          getActivePlays('Space').length > 0
+            ? 'Stop Space'
+            : 'Stop Space; no sound playing'
+        "
+        @click.stop="onStop('Space')"
       >
-        Stop all sounds
+        <svg
+          class="h-full w-full"
+          :class="
+            getActivePlays('Space').length > 0
+              ? 'opacity-100 text-red-500'
+              : 'opacity-0'
+          "
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            fill="none"
+            stroke="currentColor"
+          />
+          <rect x="8" y="8" width="8" height="8" fill="currentColor" />
+        </svg>
       </button>
     </div>
   </div>

@@ -95,15 +95,30 @@ onUnmounted(() => {
     </div>
 
     <!-- Mobile: grid of sound buttons -->
-    <div class="md:hidden">
+    <div class="md:hidden" :class="hasAnyActivePlays && 'pb-14'">
       <MobileSoundGrid
         :loading="loading"
         :shift-held="shiftHeld"
         :get-active-plays="getActivePlays"
-        :has-any-active-plays="hasAnyActivePlays"
         @play="play"
         @stop="handleStop"
       />
+    </div>
+
+    <!-- Mobile only: fixed "Stop all sounds" when any sound is playing -->
+    <div
+      v-if="hasAnyActivePlays"
+      class="fixed bottom-0 left-0 right-0 z-10 flex h-14 items-center justify-center border-t border-key-shift bg-key-shift shadow-[0_-2px_8px_rgba(0,0,0,0.08)] md:hidden"
+    >
+      <button
+        type="button"
+        class="h-full w-full font-medium transition hover:bg-key-shift/90 active:bg-key-shift/80"
+        style="color: #1a1a1a"
+        aria-label="Stop all sounds"
+        @click="fadeOutAll"
+      >
+        Stop all sounds
+      </button>
     </div>
   </div>
 </template>
