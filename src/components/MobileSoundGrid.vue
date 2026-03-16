@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { ActivePlay } from '../composables/useSoundboard';
 import Key from './Key.vue';
 import { getKeyDefinition, QWERTY_ROWS, type Letter } from '../lib/config';
 
@@ -8,7 +9,7 @@ const props = defineProps<{
   shiftHeld: boolean;
   getActivePlays: (
     letter: Letter
-  ) => { id: string; progress: number; fadeOutProgress?: number }[];
+  ) => ActivePlay[];
   loadedSoundsCount: number;
   totalSounds: number;
   allSoundsLoaded: boolean;

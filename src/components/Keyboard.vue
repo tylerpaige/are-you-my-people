@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { ActivePlay } from '../composables/useSoundboard';
 import type { Letter } from '../lib/config';
 import Key from './Key.vue';
 import { getKeyDefinition } from '../lib/config';
@@ -8,7 +9,7 @@ const props = defineProps<{
   loading: boolean;
   rows: Letter[][];
   shiftHeld: boolean;
-  getActivePlays: (letter: Letter) => { id: string; progress: number }[];
+  getActivePlays: (letter: Letter) => ActivePlay[];
   loadedSoundsCount: number;
   totalSounds: number;
   allSoundsLoaded: boolean;
