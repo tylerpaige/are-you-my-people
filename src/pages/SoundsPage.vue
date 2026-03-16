@@ -4,6 +4,7 @@ import Keyboard from '../components/Keyboard.vue';
 import MobileSoundGrid from '../components/MobileSoundGrid.vue';
 import Logo from '../components/Logo.vue';
 import { useSoundboard } from '../composables/useSoundboard';
+import { useFeedProducer } from '../composables/useRealtimeFeed';
 import { KEY_CODE_TO_DEFINITION, QWERTY_ROWS, type Letter } from '../lib/config';
 
 const {
@@ -21,6 +22,8 @@ const {
   allSoundsLoaded,
 } = useSoundboard();
 const shiftHeld = ref(false);
+
+const { publishSoundPlay, publishSoundStop } = useFeedProducer();
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Shift') {
@@ -49,6 +52,14 @@ function handleKeydown(e: KeyboardEvent) {
   } else {
     play(definition.letter);
   }
+
+  if (definition?.letter) {
+    if (e.shiftKey) {
+      publishSoundStop(definition.letter);
+    } else {
+      publishSoundPlay(definition.letter);
+    }
+  }
 }
 
 function handleStop(letter: Letter) {
@@ -57,6 +68,8 @@ function handleStop(letter: Letter) {
   } else {
     fadeOut(letter);
   }
+
+  publishSoundStop(letter);
 }
 
 function handleKeyup(e: KeyboardEvent) {

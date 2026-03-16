@@ -19,6 +19,8 @@ const COLORS: CardColor[] = [
   { background: 'bg-red', text: 'text-white', nextGlow: 'to-red' },
 ];
 
+import { useFeedProducer } from '../composables/useRealtimeFeed';
+
 const currentIndex = ref(0);
 const displayIndex = ref(0);
 const direction = ref<'next' | 'prev'>('next');
@@ -31,6 +33,8 @@ const rightGlowEl = ref<HTMLElement | null>(null);
 const backgroundIndex = ref(0);
 
 const hasQuestions = computed(() => QUESTIONS.length > 0);
+
+const { publishQuestionChanged } = useFeedProducer();
 
 const foregroundIndex = computed(() =>
   exitingIndex.value !== null ? exitingIndex.value : displayIndex.value
@@ -97,6 +101,8 @@ function animateToIndex(
   // while the exiting card still appears on top via `foregroundIndex`.
   currentIndex.value = normalizedTarget;
   displayIndex.value = normalizedTarget;
+
+  publishQuestionChanged(normalizedTarget);
 
   const offDeck =
     dir === 'next'

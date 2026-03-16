@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import QuestionsPage from './pages/QuestionsPage.vue';
 import SoundsPage from './pages/SoundsPage.vue';
+import FeedPage from './pages/FeedPage.vue';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -22,6 +23,12 @@ export const router = createRouter({
       name: 'sounds',
       component: SoundsPage,
       meta: { title: 'Are You My People? — Sounds' },
+    },
+    {
+      path: '/feed',
+      name: 'feed',
+      component: FeedPage,
+      meta: { title: 'Are You My People? — Feed' },
     },
     {
       path: '/:pathMatch(.*)*',
