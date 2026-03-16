@@ -12,11 +12,11 @@ interface CardColor {
   nextGlow: string;
 }
 const COLORS: CardColor[] = [
-  { background: 'bg-blue', text: 'text-black', nextGlow: 'to-green' },
-  { background: 'bg-green', text: 'text-brown', nextGlow: 'to-yellow' },
-  { background: 'bg-yellow', text: 'text-brown', nextGlow: 'to-orange' },
-  { background: 'bg-orange', text: 'text-brown', nextGlow: 'to-red' },
-  { background: 'bg-red', text: 'text-white', nextGlow: 'to-blue' },
+  { background: 'bg-blue', text: 'text-black', nextGlow: 'to-blue' },
+  { background: 'bg-green', text: 'text-brown', nextGlow: 'to-green' },
+  { background: 'bg-yellow', text: 'text-brown', nextGlow: 'to-yellow' },
+  { background: 'bg-orange', text: 'text-brown', nextGlow: 'to-orange' },
+  { background: 'bg-red', text: 'text-white', nextGlow: 'to-red' },
 ];
 
 const currentIndex = ref(0);
@@ -205,14 +205,14 @@ onUnmounted(() => {
     <!-- Glow overlays: fixed to viewport edges, full screen height -->
     <div
       ref="leftGlowEl"
-      class="pointer-events-none fixed inset-y-0 left-0 w-1/3 opacity-0 bg-linear-to-l from-transparent"
-      :class="getCardColor(backgroundIndex).nextGlow"
+      class="pointer-events-none fixed inset-y-0 left-0 w-full opacity-0 bg-linear-to-bl from-transparent from-70%"
+      :class="getCardColor(currentIndex).nextGlow"
       style="z-index: 35"
     />
     <div
       ref="rightGlowEl"
-      class="pointer-events-none fixed inset-y-0 right-0 w-1/3 opacity-0 bg-linear-to-r from-transparent"
-      :class="getCardColor(nextIndex).nextGlow"
+      class="pointer-events-none fixed inset-y-0 right-0 w-full opacity-0 bg-linear-to-br from-transparent from-70%"
+      :class="getCardColor(currentIndex).nextGlow"
       style="z-index: 35"
     />
 
