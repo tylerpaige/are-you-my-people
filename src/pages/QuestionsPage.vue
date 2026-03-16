@@ -105,6 +105,9 @@ function animateToIndex(
 
   const tl = gsap.timeline({
     onComplete: () => {
+      if (options?.markAskedAfterExit && options.sourceIndex != null) {
+        markAsked(options.sourceIndex);
+      }
       isAnimating.value = false;
       exitingIndex.value = null;
     },
@@ -118,12 +121,10 @@ function animateToIndex(
     ease: 'power2.inOut',
   });
 
-  // Switch: next card comes on top, old card moves back under the deck.
+  // At peak offset, drop exiting card under the deck so the next
+  // background card visually becomes the top of the pile.
   tl.add(() => {
-    if (options?.markAskedAfterExit && options.sourceIndex != null) {
-      markAsked(options.sourceIndex);
-    }
-    gsap.set(el, { zIndex: 15 });
+    gsap.set(el, { zIndex: 5 });
   });
 
   // Phase 2: old card settles back to deck position underneath.
