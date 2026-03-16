@@ -18,20 +18,29 @@ function getDisplayLabel(letter: Letter) {
   >
     <header class="mb-10 flex items-center justify-between gap-4">
       <Logo />
-      <div class="text-right text-xs md:text-sm text-yellow/80">
-        <p class="font-semibold uppercase tracking-wide">Live feed</p>
-        <p class="opacity-80">
-          Mirroring questions &amp; sounds from other devices
-        </p>
-      </div>
     </header>
 
     <main class="flex-1 flex flex-col gap-10 md:gap-12">
       <!-- Current question -->
       <section
-        class="relative flex-1 rounded-2xl bg-yellow/95 text-brown shadow-lg px-6 py-6 md:px-10 md:py-10 flex items-center justify-center"
+        class="relative flex-1 rounded-2xl overflow-hidden text-[white] shadow-lg px-6 py-6 md:px-10 md:py-10 flex items-center justify-center"
       >
-        <div class="w-full max-w-3xl text-center">
+        <!-- Background YouTube video -->
+        <div
+          class="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden"
+          aria-hidden="true"
+        >
+          <iframe
+            class="absolute top-1/2 left-1/2 min-w-full min-h-full -translate-x-1/2 -translate-y-1/2"
+            src="https://www.youtube.com/embed/iAtNl85CCIg?autoplay=1&mute=1&loop=1&controls=0&playlist=iAtNl85CCIg&modestbranding=1&playsinline=1&rel=0&fs=0&disablekb=1"
+            title="Background video"
+            frameborder="0"
+            allow="autoplay; encrypted-media; picture-in-picture"
+          ></iframe>
+        </div>
+
+        <!-- Foreground content -->
+        <div class="relative z-10 w-full max-w-3xl text-center">
           <h2 class="mb-3 text-xs font-semibold uppercase tracking-[0.16em]">
             Current question
           </h2>
