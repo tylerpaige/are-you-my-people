@@ -41,8 +41,8 @@ function onStop(letter: Letter) {
     <div class="mt-2 mb-8 max-w-sm text-sm leading-tight text-yellow/80">
       <h2 class="mb-1 text-md font-bold underline">Instructions</h2>
       <p class="">
-        Click a button. Repeat clicks trigger multiple plays. When a sound is
-        playing, a stop button will appear.
+        Tap a button to play a sound; tap repeatedly to layer multiple plays.
+        Long-press a button to silence its sound.
       </p>
     </div>
 
@@ -69,41 +69,6 @@ function onStop(letter: Letter) {
             @play="onPlay(letter)"
             @stop="onStop(letter)"
           />
-          <button
-            v-if="getKeyDefinition(letter).soundUrl"
-            type="button"
-            class="absolute bottom-1 right-1 z-10 flex min-h-9 min-w-9 items-center justify-center rounded-md p-1.5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-0 [height:max(2.25rem,33%)] [width:max(2.25rem,33%)]"
-            :aria-label="
-              getActivePlays(letter).length > 0
-                ? `Stop ${letter}`
-                : `Stop ${letter}; no sound playing`
-            "
-            :disabled="getActivePlays(letter).length === 0"
-            @click.stop="onStop(letter)"
-          >
-            <svg
-              class="h-full w-full"
-              :class="
-                getActivePlays(letter).length > 0
-                  ? 'opacity-100 text-red-500'
-                  : 'opacity-0'
-              "
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                fill="none"
-                stroke="currentColor"
-              />
-              <rect x="8" y="8" width="8" height="8" fill="currentColor" />
-            </svg>
-          </button>
         </div>
       </template>
     </div>

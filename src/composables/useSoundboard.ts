@@ -3,6 +3,10 @@ import gsap from 'gsap';
 import { getKeyDefinition, KEY_CONFIG, Letter, LETTERS } from '../lib/config';
 
 const FADEOUT_MS = 1000;
+/** Duration of slow fade while Enter is held (seconds). */
+const ENTER_HOLD_SLOW_FADE_SEC = 3;
+/** Duration of quick fade when Enter is released (seconds). */
+const ENTER_RELEASE_QUICK_FADE_SEC = 0.2;
 
 interface WebAudioPlayEntry {
   id: string;
@@ -30,6 +34,21 @@ export function useSoundboard() {
   const nextColorIndexByKey = reactive<Record<string, number>>({});
   const bufferByUrl: Record<string, AudioBuffer> = {};
   let audioContext: AudioContext | null = null;
+
+  /** Play ids that were active when Enter was pressed; only these are faded by Enter. */
+  let enterFadeSnapshotIds = new Set<string>();
+  /** Active slow-fade tweens keyed by play id, so we can kill them on Enter release. */
+  const enterFadeTweens = new Map<string, gsap.core.Tween>();
+
+  function findPlayById(id: string): WebAudioPlayEntry | null {
+    for (const letter of LETTERS) {
+      const arr = activePlaysByKey[letter];
+      if (!arr) continue;
+      const entry = arr.find((p) => p.id === id);
+      if (entry) return entry;
+    }
+    return null;
+  }
 
   const lettersWithSound = Object.values(KEY_CONFIG).filter(
     (config) => config.soundUrl
@@ -201,6 +220,72 @@ export function useSoundboard() {
     });
   }
 
+  /**
+   * Called on Enter keydown: snapshot currently playing sounds and start a slow
+   * fade out. Only these snapshot sounds are affected; new plays are untouched.
+   */
+  function startEnterHoldFade(): void {
+    const snapshot = new Set<string>();
+    for (const letter of LETTERS) {
+      const arr = activePlaysByKey[letter];
+      if (!arr) continue;
+      for (const entry of arr) snapshot.add(entry.id);
+    }
+    if (snapshot.size === 0) return;
+
+    enterFadeSnapshotIds = snapshot;
+    enterFadeTweens.clear();
+
+    for (const letter of LETTERS) {
+      const arr = activePlaysByKey[letter];
+      if (!arr) continue;
+      for (const entry of arr) {
+        if (!snapshot.has(entry.id)) continue;
+        const vol = { v: entry.gainNode.gain.value };
+        const tween = gsap.to(vol, {
+          v: 0,
+          duration: ENTER_HOLD_SLOW_FADE_SEC,
+          ease: 'none',
+          onUpdate: () => {
+            entry.gainNode.gain.value = vol.v;
+          },
+        });
+        enterFadeTweens.set(entry.id, tween);
+      }
+    }
+  }
+
+  /**
+   * Called on Enter keyup: stop slow fade and quick-fade snapshot sounds to 0,
+   * then stop their sources. Only affects plays that were in the Enter keydown snapshot.
+   */
+  function endEnterHoldFade(): void {
+    for (const id of enterFadeSnapshotIds) {
+      const tween = enterFadeTweens.get(id);
+      if (tween) tween.kill();
+      enterFadeTweens.delete(id);
+
+      const entry = findPlayById(id);
+      if (!entry) continue;
+
+      const vol = { v: entry.gainNode.gain.value };
+      gsap.to(vol, {
+        v: 0,
+        duration: ENTER_RELEASE_QUICK_FADE_SEC,
+        ease: 'none',
+        onUpdate: () => {
+          entry.gainNode.gain.value = vol.v;
+        },
+        onComplete: () => {
+          entry.progressTween.kill();
+          entry.source.stop();
+        },
+      });
+    }
+    enterFadeSnapshotIds = new Set();
+    enterFadeTweens.clear();
+  }
+
   const hasAnyActivePlays = computed(() =>
     LETTERS.some((letter) => (activePlaysByKey[letter]?.length ?? 0) > 0)
   );
@@ -225,6 +310,8 @@ export function useSoundboard() {
     play,
     fadeOut,
     fadeOutAll,
+    startEnterHoldFade,
+    endEnterHoldFade,
     hasAnyActivePlays,
     KEY_CONFIG,
   };

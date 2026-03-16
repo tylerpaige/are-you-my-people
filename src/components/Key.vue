@@ -39,6 +39,9 @@ const emit = defineEmits<{
 const shouldStopAfterCycle = ref(false);
 const loadingAnimationStopped = ref(false);
 const keyEl = ref<HTMLElement | null>(null);
+const longPressTimeoutId = ref<number | null>(null);
+const longPressTriggered = ref(false);
+const suppressNextClick = ref(false);
 const tooltip = computed<string | undefined>(() => {
   if (props.letter === 'Space' && props.shiftHeld) {
     return 'Click to stop all sounds';
@@ -164,7 +167,46 @@ onBeforeUnmount(() => {
   killLoadingTimeline();
 });
 
+function clearLongPressTimeout() {
+  if (longPressTimeoutId.value != null) {
+    window.clearTimeout(longPressTimeoutId.value);
+    longPressTimeoutId.value = null;
+  }
+}
+
+function onPointerDown(e: PointerEvent) {
+  // Only treat touch/pens as long-press candidates; mouse keeps click behavior.
+  if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+
+  longPressTriggered.value = false;
+  suppressNextClick.value = false;
+
+  clearLongPressTimeout();
+  longPressTimeoutId.value = window.setTimeout(() => {
+    longPressTriggered.value = true;
+    suppressNextClick.value = true;
+    emit('stop', props.letter);
+  }, 450);
+}
+
+function onPointerUp(e: PointerEvent) {
+  if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+    clearLongPressTimeout();
+  }
+}
+
+function onPointerCancel(e: PointerEvent) {
+  if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+    clearLongPressTimeout();
+  }
+}
+
 function onClick(e: MouseEvent) {
+  if (suppressNextClick.value) {
+    suppressNextClick.value = false;
+    return;
+  }
+
   if (e.shiftKey) {
     emit('stop', props.letter);
   } else {
@@ -189,6 +231,9 @@ function onClick(e: MouseEvent) {
     ]"
     :disabled="disabled"
     :title="tooltip"
+    @pointerdown="onPointerDown"
+    @pointerup="onPointerUp"
+    @pointercancel="onPointerCancel"
     @click="onClick"
   >
     <template v-if="props.letter === 'Space' && props.shiftHeld">

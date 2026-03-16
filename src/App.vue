@@ -11,6 +11,8 @@ const {
   play,
   fadeOut,
   fadeOutAll,
+  startEnterHoldFade,
+  endEnterHoldFade,
   getActivePlays,
   hasAnyActivePlays,
   totalSounds,
@@ -22,6 +24,9 @@ const shiftHeld = ref(false);
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Shift') {
     shiftHeld.value = true;
+  }
+  if (e.key === 'Enter' && !e.repeat) {
+    startEnterHoldFade();
   }
   if (e.key === 'Escape') {
     fadeOutAll();
@@ -56,6 +61,9 @@ function handleStop(letter: Letter) {
 function handleKeyup(e: KeyboardEvent) {
   if (e.key === 'Shift') {
     shiftHeld.value = false;
+  }
+  if (e.key === 'Enter') {
+    endEnterHoldFade();
   }
 }
 
