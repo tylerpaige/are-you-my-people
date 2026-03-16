@@ -7,9 +7,7 @@ import { getKeyDefinition, QWERTY_ROWS, type Letter } from '../lib/config';
 const props = defineProps<{
   loading: boolean;
   shiftHeld: boolean;
-  getActivePlays: (
-    letter: Letter
-  ) => ActivePlay[];
+  getActivePlays: (letter: Letter) => ActivePlay[];
   loadedSoundsCount: number;
   totalSounds: number;
   allSoundsLoaded: boolean;
@@ -50,7 +48,7 @@ function onStop(letter: Letter) {
 
     <!-- 4 square keys per row; label/sublabel centered; fadeout inset bottom-right at 1/4 size -->
     <div
-      class="grid grid-cols-4 gap-3"
+      class="grid grid-cols-3 gap-3 sm:grid-cols-4"
       :class="loading && 'pointer-events-none opacity-60'"
     >
       <template v-for="letter in lettersInQwertyOrder" :key="letter">
