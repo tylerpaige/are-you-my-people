@@ -221,7 +221,7 @@ function onClick(e: MouseEvent) {
     type="button"
     class="
       key-cap relative flex flex-col items-center justify-center
-      overflow-hidden rounded-lg px-2 py-1.5 shadow-sm md:px-3 md:py-2
+      overflow-hidden rounded-lg px-2 py-1.5 shadow-xs md:px-3 md:py-2
       disabled:pointer-events-none disabled:opacity-50
       [container-type:size]
     "

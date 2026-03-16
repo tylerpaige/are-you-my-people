@@ -1,6 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --font-ranchers: 'Ranchers', cursive;
+
+  --color-brown: #4e1d1f;
+  --color-green: #a0dd87;
+  --color-blue: #9bc8e5;
+  --color-red: #f70000;
+  --color-yellow: #faea3e;
+  --color-white: #ebeeb2;
+  --color-orange: #ffa935;
+}
 
 body {
   margin: 0;
