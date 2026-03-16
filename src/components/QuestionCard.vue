@@ -12,7 +12,7 @@ const lines = computed(() => props.question.split('\n'));
 </script>
 
 <template>
-  <div class="relative px-6 md:px-10 py-8 w-full">
+  <div class="relative px-6 md:px-10 py-8 w-full origin-bottom-left">
     <div class="max-w-xl mx-auto">
       <p
         class="font-sans text-center text-xl md:text-3xl leading-tight"

@@ -100,7 +100,7 @@ function animateToIndex(
 
   const offDeck =
     dir === 'next'
-      ? { x: -120, y: 40, rotate: -15 }
+      ? { x: -120, y: -120, rotate: -90 }
       : { x: 120, y: 40, rotate: 15 };
 
   const tl = gsap.timeline({
@@ -244,7 +244,7 @@ onUnmounted(() => {
       <div
         v-if="hasQuestions"
         ref="cardEl"
-        class="absolute inset-0 rounded-xl flex items-center w-full"
+        class="absolute inset-0 rounded-xl flex items-center w-full origin-bottom-left"
         :class="[getCardColor(foregroundIndex).background]"
         :style="{
           filter:
