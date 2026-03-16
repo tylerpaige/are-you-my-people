@@ -229,18 +229,23 @@ function onClick(e: MouseEvent) {
         Silence
       </span>
     </template>
-    <!-- One overlay per active play; width = progress%; opacity fades in sync with audio fadeout -->
+    <!-- One overlay per active play; scaleX = progress; opacity fades in sync with audio fadeout -->
     <template v-for="(play, i) in activePlays" :key="play.id">
       <div
-        class="absolute left-0 z-[1] transition-[width] duration-75"
+        class="
+          absolute left-0 z-[1]
+          origin-left
+          transition-transform duration-75
+        "
         :class="getPlayColorClass(play)"
         :style="{
-          width: `${(play.progress ?? 0) * 100}%`,
+          width: '100%',
           height:
             activePlays.length > 1 ? `${100 / activePlays.length}%` : '100%',
           top:
             activePlays.length > 1 ? `${(i * 100) / activePlays.length}%` : '0',
           opacity: 1 - (play.fadeOutProgress ?? 0),
+          transform: `scaleX(${play.progress ?? 0})`,
         }"
         aria-hidden
       />
