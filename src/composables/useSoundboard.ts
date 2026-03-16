@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { getKeyDefinition, KEY_CONFIG, Letter, LETTERS } from '../lib/config';
 
 const FADEOUT_MS = 1000;
+const POOL_SIZE = 4;
 
 export interface ActivePlay {
   id: string;
@@ -27,6 +28,8 @@ export function useSoundboard() {
   const fadeOutProgressById = reactive<Record<string, number>>({});
   const durationsByUrl = reactive<Record<string, number>>({});
   const nextColorIndexByKey = reactive<Record<string, number>>({});
+  const audioPoolByUrl: Record<string, HTMLAudioElement[]> = {};
+  const nextPoolIndexByUrl: Record<string, number> = {};
 
   const lettersWithSound = Object.values(KEY_CONFIG).filter(
     (config) => config.soundUrl
@@ -42,11 +45,28 @@ export function useSoundboard() {
     const promises = lettersWithSound.map((definition) => {
       const soundUrl = definition.soundUrl!;
       return new Promise<void>((resolve, reject) => {
-        const audio = new Audio(soundUrl);
-        audio.addEventListener(
+        // Create a small pool of HTMLAudioElements per sound so we can reuse
+        // them for low-latency playback (especially on iOS Safari).
+        const pool: HTMLAudioElement[] = [];
+        audioPoolByUrl[soundUrl] = pool;
+        nextPoolIndexByUrl[soundUrl] = 0;
+
+        const primaryAudio = new Audio(soundUrl);
+        primaryAudio.preload = 'auto';
+        pool.push(primaryAudio);
+
+        // Create additional pooled instances that will benefit from the
+        // browser cache once the primary one has loaded.
+        for (let i = 1; i < POOL_SIZE; i += 1) {
+          const a = new Audio(soundUrl);
+          a.preload = 'auto';
+          pool.push(a);
+        }
+
+        primaryAudio.addEventListener(
           'canplaythrough',
           () => {
-            const d = audio.duration;
+            const d = primaryAudio.duration;
             if (Number.isFinite(d) && d > 0) {
               durationsByUrl[soundUrl] = d;
             } else {
@@ -56,12 +76,12 @@ export function useSoundboard() {
           },
           { once: true }
         );
-        audio.addEventListener(
+        primaryAudio.addEventListener(
           'error',
           () => reject(new Error(`Failed to load ${soundUrl}`)),
           { once: true }
         );
-        audio.load();
+        primaryAudio.load();
       });
     });
 
@@ -77,8 +97,25 @@ export function useSoundboard() {
 
     const duration = durationsByUrl[soundUrl] ?? 1;
 
-    const audio = new Audio(soundUrl);
+    const pool = audioPoolByUrl[soundUrl];
+    let audio: HTMLAudioElement;
+    if (pool && pool.length > 0) {
+      // Prefer a non-playing instance; fall back to the first in the pool.
+      const available = pool.find((a) => a && a.paused);
+      audio = available ?? pool[0]!;
+    } else {
+      // Fallback for any sounds that weren't preloaded for some reason.
+      audio = new Audio(soundUrl);
+      audio.preload = 'auto';
+    }
+
     audio.volume = 1;
+    try {
+      // Reset playback position for re-use; guard in case readyState is not yet sufficient.
+      audio.currentTime = 0;
+    } catch {
+      // Ignore; the browser will start from the current position if it can't seek yet.
+    }
     const id = `${letter}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const startedAt = Date.now();
     progressById[id] = 0;
