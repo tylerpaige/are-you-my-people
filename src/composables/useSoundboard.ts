@@ -3,7 +3,16 @@ import gsap from 'gsap';
 import { getKeyDefinition, KEY_CONFIG, Letter, LETTERS } from '../lib/config';
 
 const FADEOUT_MS = 1000;
-const POOL_SIZE = 4;
+
+interface WebAudioPlayEntry {
+  id: string;
+  source: AudioBufferSourceNode;
+  gainNode: GainNode;
+  startedAt: number;
+  duration: number;
+  progressTween: gsap.core.Tween;
+  colorIndex: number;
+}
 
 export interface ActivePlay {
   id: string;
@@ -12,24 +21,15 @@ export interface ActivePlay {
   colorIndex: number;
 }
 
-interface PlayEntry {
-  id: string;
-  audio: HTMLAudioElement;
-  startedAt: number;
-  duration: number;
-  progressTween: gsap.core.Tween;
-  colorIndex: number;
-}
-
 export function useSoundboard() {
   const loading = ref(true);
-  const activePlaysByKey = reactive<Record<string, PlayEntry[]>>({});
+  const activePlaysByKey = reactive<Record<string, WebAudioPlayEntry[]>>({});
   const progressById = reactive<Record<string, number>>({});
   const fadeOutProgressById = reactive<Record<string, number>>({});
   const durationsByUrl = reactive<Record<string, number>>({});
   const nextColorIndexByKey = reactive<Record<string, number>>({});
-  const audioPoolByUrl: Record<string, HTMLAudioElement[]> = {};
-  const nextPoolIndexByUrl: Record<string, number> = {};
+  const bufferByUrl: Record<string, AudioBuffer> = {};
+  let audioContext: AudioContext | null = null;
 
   const lettersWithSound = Object.values(KEY_CONFIG).filter(
     (config) => config.soundUrl
@@ -41,48 +41,30 @@ export function useSoundboard() {
     nextColorIndexByKey[letter] = 0;
   });
 
+  function ensureAudioContext(): AudioContext {
+    if (!audioContext) {
+      audioContext = new AudioContext();
+    }
+    return audioContext;
+  }
+
   function preload() {
+    const ctx = ensureAudioContext();
     const promises = lettersWithSound.map((definition) => {
       const soundUrl = definition.soundUrl!;
-      return new Promise<void>((resolve, reject) => {
-        // Create a small pool of HTMLAudioElements per sound so we can reuse
-        // them for low-latency playback (especially on iOS Safari).
-        const pool: HTMLAudioElement[] = [];
-        audioPoolByUrl[soundUrl] = pool;
-        nextPoolIndexByUrl[soundUrl] = 0;
-
-        const primaryAudio = new Audio(soundUrl);
-        primaryAudio.preload = 'auto';
-        pool.push(primaryAudio);
-
-        // Create additional pooled instances that will benefit from the
-        // browser cache once the primary one has loaded.
-        for (let i = 1; i < POOL_SIZE; i += 1) {
-          const a = new Audio(soundUrl);
-          a.preload = 'auto';
-          pool.push(a);
-        }
-
-        primaryAudio.addEventListener(
-          'canplaythrough',
-          () => {
-            const d = primaryAudio.duration;
-            if (Number.isFinite(d) && d > 0) {
-              durationsByUrl[soundUrl] = d;
-            } else {
-              durationsByUrl[soundUrl] = 1;
-            }
-            resolve();
-          },
-          { once: true }
-        );
-        primaryAudio.addEventListener(
-          'error',
-          () => reject(new Error(`Failed to load ${soundUrl}`)),
-          { once: true }
-        );
-        primaryAudio.load();
-      });
+      return fetch(soundUrl)
+        .then((res) => {
+          if (!res.ok) throw new Error(`Failed to load ${soundUrl}`);
+          return res.arrayBuffer();
+        })
+        .then((arrayBuffer) =>
+          ctx.decodeAudioData(arrayBuffer.slice(0))
+        )
+        .then((buffer) => {
+          bufferByUrl[soundUrl] = buffer;
+          const d = buffer.duration;
+          durationsByUrl[soundUrl] = Number.isFinite(d) && d > 0 ? d : 1;
+        });
     });
 
     return Promise.all(promises).then(() => {
@@ -91,31 +73,33 @@ export function useSoundboard() {
   }
 
   function play(letter: Letter): void {
+    const ctx = ensureAudioContext();
+    if (ctx.state === 'suspended') {
+      // iOS Safari often starts AudioContext in suspended state; resume on user gesture.
+      void ctx.resume();
+    }
+
     const config = getKeyDefinition(letter);
     const soundUrl = config?.soundUrl;
     if (!config || !soundUrl) return;
 
-    const duration = durationsByUrl[soundUrl] ?? 1;
-
-    const pool = audioPoolByUrl[soundUrl];
-    let audio: HTMLAudioElement;
-    if (pool && pool.length > 0) {
-      // Prefer a non-playing instance; fall back to the first in the pool.
-      const available = pool.find((a) => a && a.paused);
-      audio = available ?? pool[0]!;
-    } else {
-      // Fallback for any sounds that weren't preloaded for some reason.
-      audio = new Audio(soundUrl);
-      audio.preload = 'auto';
+    const buffer = bufferByUrl[soundUrl];
+    if (!buffer) {
+      // Not yet decoded for some reason; fall back to a minimal HTMLAudioElement to avoid a hard no-op.
+      const fallback = new Audio(soundUrl);
+      fallback.preload = 'auto';
+      fallback.play().catch(() => {});
+      return;
     }
 
-    audio.volume = 1;
-    try {
-      // Reset playback position for re-use; guard in case readyState is not yet sufficient.
-      audio.currentTime = 0;
-    } catch {
-      // Ignore; the browser will start from the current position if it can't seek yet.
-    }
+    const duration = durationsByUrl[soundUrl] ?? buffer.duration ?? 1;
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 1;
+    source.connect(gainNode).connect(ctx.destination);
+
     const id = `${letter}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const startedAt = Date.now();
     progressById[id] = 0;
@@ -141,13 +125,12 @@ export function useSoundboard() {
     nextColorIndexByKey[letter] = (colorIndex + 1) % 4;
 
     const plays = activePlaysByKey[letter];
-    if (plays) plays.push({ id, audio, startedAt, duration, progressTween, colorIndex });
+    if (plays) plays.push({ id, source, gainNode, startedAt, duration, progressTween, colorIndex });
 
-    audio.addEventListener('ended', remove, { once: true });
-    audio.play().catch(() => {
-      progressTween.kill();
+    source.addEventListener('ended', () => {
       remove();
     });
+    source.start(0);
   }
 
   function fadeOut(letter: Letter): void {
@@ -160,7 +143,7 @@ export function useSoundboard() {
       const remainingSec = Math.max(0, entry.duration - elapsedSec);
       const fadeDurationSec = Math.min(FADEOUT_MS / 1000, remainingSec);
       if (fadeDurationSec <= 0) {
-        entry.audio.pause();
+        entry.source.stop();
         entry.progressTween.kill();
         const idx = plays.findIndex((p) => p.id === entry.id);
         if (idx !== -1) plays.splice(idx, 1);
@@ -176,7 +159,7 @@ export function useSoundboard() {
         const arr = activePlaysByKey[letter];
         const i = arr?.findIndex((p) => p.id === entry.id);
         if (arr != null && i !== undefined && i !== -1) arr.splice(i, 1);
-        entry.audio.pause();
+        entry.source.stop();
         delete progressById[entry.id];
         delete fadeOutProgressById[entry.id];
       };
@@ -188,13 +171,13 @@ export function useSoundboard() {
         onComplete: remove,
       });
 
-      const volumeRef = { v: entry.audio.volume };
+      const volumeRef = { v: entry.gainNode.gain.value };
       gsap.to(volumeRef, {
         v: 0,
         duration: fadeDurationSec,
         ease: 'none',
         onUpdate: () => {
-          entry.audio.volume = volumeRef.v;
+          entry.gainNode.gain.value = volumeRef.v;
         },
       });
     });
