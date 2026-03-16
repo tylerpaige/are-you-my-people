@@ -162,10 +162,10 @@ function onClick(e: MouseEvent) {
     :class="[
       centerLabel ? 'text-center' : 'text-left',
       shiftHeld && !disabled
-        ? ' bg-key-shift hover:bg-key-shift/90 active:bg-key-shift/80 ring-2 ring-key-shift/50'
+        ? ' bg-orange hover:bg-orange/90 active:bg-orange/80 ring-2 ring-orange/50'
         : loadingAnimationStopped
-          ? ' bg-key-bg hover:bg-key-bg/90 active:bg-key-bg/80'
-          : ' bg-key-bg/20 hover:bg-key-bg/90 active:bg-key-bg/80',
+          ? ' bg-white hover:bg-white/90 active:bg-white/80'
+          : ' bg-white/20 hover:bg-white/90 active:bg-white/80',
     ]"
     :disabled="disabled"
     :title="
