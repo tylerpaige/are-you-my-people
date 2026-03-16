@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import gsap from 'gsap';
 import type { ActivePlay } from '../composables/useSoundboard';
 import type { Letter } from '../lib/config';
@@ -39,6 +39,25 @@ const emit = defineEmits<{
 const shouldStopAfterCycle = ref(false);
 const loadingAnimationStopped = ref(false);
 const keyEl = ref<HTMLElement | null>(null);
+const tooltip = computed<string | undefined>(() => {
+  if (props.letter === 'Space' && props.shiftHeld) {
+    return 'Click to stop all sounds';
+  }
+  if (props.shiftHeld && !props.disabled) {
+    return 'Click to silence this sound';
+  }
+  return undefined;
+});
+
+const keyStateClass = computed(() => {
+  if (props.shiftHeld && !props.disabled) {
+    return 'bg-orange hover:bg-orange/90 active:bg-orange/80 ring-2 ring-orange/50';
+  }
+  if (loadingAnimationStopped.value) {
+    return 'bg-white hover:bg-white/90 active:bg-white/80';
+  }
+  return 'bg-white/20 hover:bg-white/90 active:bg-white/80';
+});
 let loadingTimeline: gsap.core.Timeline | null = null;
 
 function getPlayColorClass(play: ActivePlay) {
@@ -158,23 +177,18 @@ function onClick(e: MouseEvent) {
   <button
     ref="keyEl"
     type="button"
-    class="key-cap relative flex flex-col items-center justify-center overflow-hidden rounded-lg px-2 py-1.5 shadow-sm disabled:pointer-events-none disabled:opacity-50 md:px-3 md:py-2 [container-type:size]"
+    class="
+      key-cap relative flex flex-col items-center justify-center
+      overflow-hidden rounded-lg px-2 py-1.5 shadow-sm md:px-3 md:py-2
+      disabled:pointer-events-none disabled:opacity-50
+      [container-type:size]
+    "
     :class="[
       centerLabel ? 'text-center' : 'text-left',
-      shiftHeld && !disabled
-        ? ' bg-orange hover:bg-orange/90 active:bg-orange/80 ring-2 ring-orange/50'
-        : loadingAnimationStopped
-          ? ' bg-white hover:bg-white/90 active:bg-white/80'
-          : ' bg-white/20 hover:bg-white/90 active:bg-white/80',
+      keyStateClass,
     ]"
     :disabled="disabled"
-    :title="
-      props.letter === 'Space' && props.shiftHeld
-        ? 'Click to stop all sounds'
-        : shiftHeld && !disabled
-          ? 'Click to silence this sound'
-          : undefined
-    "
+    :title="tooltip"
     @click="onClick"
   >
     <template v-if="props.letter === 'Space' && props.shiftHeld">

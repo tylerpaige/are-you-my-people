@@ -38,8 +38,8 @@ function onStop(letter: Letter) {
 
 <template>
   <div class="relative w-full">
-    <div class="mt-2 mb-8 text-sm leading-tight text-yellow/80 max-w-sm">
-      <h2 class="text-md font-bold underline mb-1">Instructions</h2>
+    <div class="mt-2 mb-8 max-w-sm text-sm leading-tight text-yellow/80">
+      <h2 class="mb-1 text-md font-bold underline">Instructions</h2>
       <p class="">
         Click a button. Repeat clicks trigger multiple plays. When a sound is
         playing, a stop button will appear.
@@ -49,7 +49,9 @@ function onStop(letter: Letter) {
     <!-- 4 square keys per row; label/sublabel centered; fadeout inset bottom-right at 1/4 size -->
     <div
       class="grid grid-cols-3 gap-3 sm:grid-cols-4"
-      :class="loading && 'pointer-events-none opacity-60'"
+      :class="{
+        'pointer-events-none opacity-60': loading,
+      }"
     >
       <template v-for="letter in lettersInQwertyOrder" :key="letter">
         <div class="relative aspect-square">

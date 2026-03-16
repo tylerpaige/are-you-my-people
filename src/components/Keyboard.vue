@@ -39,8 +39,8 @@ function onStop(letter: Letter) {
 
 <template>
   <div class="relative w-full">
-    <div class="mb-24 text-sm leading-tight text-yellow/80 max-w-sm">
-      <h2 class="text-md font-bold underline mb-1">Instructions</h2>
+    <div class="mb-24 max-w-sm text-sm leading-tight text-yellow/80">
+      <h2 class="mb-1 text-md font-bold underline">Instructions</h2>
       <p class="">
         Click a button or use the keyboard to play sounds. Repeat clicks trigger
         multiple plays. Hold <span class="font-bold">shift</span> to silence a
@@ -50,14 +50,19 @@ function onStop(letter: Letter) {
 
     <!-- Keyboard grid: 4 rows, space bar spans bottom -->
     <div
-      :class="
-        (loading && 'pointer-events-none opacity-60',
-        'grid gap-[--key-gap] [--key-gap:0.5rem] md:[--key-gap:0.5rem] [--flexible-key-size:calc((100%-var(--key-gap)*9)/10)] [--key-size:clamp(2rem,var(--flexible-key-size),6rem)]')
+      class="
+        grid gap-[--key-gap]
+        [--key-gap:0.5rem] md:[--key-gap:0.5rem]
+        [--flexible-key-size:calc((100%-var(--key-gap)*9)/10)]
+        [--key-size:clamp(2rem,var(--flexible-key-size),6rem)]
       "
+      :class="{
+        'pointer-events-none opacity-60': loading,
+      }"
     >
       <template v-for="row in rows" :key="row[0]">
         <div
-          class="grid gap-[--key-gap] justify-center"
+          class="grid justify-center gap-[--key-gap]"
           :style="{
             gridTemplateColumns: `repeat(${row.length > 1 ? row.length : 5}, var(--key-size))`,
           }"
@@ -69,11 +74,9 @@ function onStop(letter: Letter) {
             :label="getKeyDefinition(letter).label || letter"
             :sublabel="getKeyDefinition(letter).label ? letter : undefined"
             :active-plays="getActivePlays(getKeyDefinition(letter).letter)"
-            :disabled="
-              letter === 'Space' ? false : !getKeyDefinition(letter).soundUrl
-            "
+            :disabled="letter !== 'Space' && !getKeyDefinition(letter).soundUrl"
             :shift-held="shiftHeld"
-            class="col-span-1 only:col-span-5 aspect-square only:aspect-[5/1]"
+            class="col-span-1 aspect-square only:col-span-5 only:aspect-[5/1]"
             :loading-delay-ms="getDelayForLetter(letter)"
             :animate-loading="true"
             :all-sounds-loaded="allSoundsLoaded"
