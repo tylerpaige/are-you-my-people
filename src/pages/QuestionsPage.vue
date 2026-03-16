@@ -45,11 +45,6 @@ const nextIndex = computed(() => {
   return (currentIndex.value + 1) % QUESTIONS.length;
 });
 
-const previousIndex = computed(() => {
-  if (!hasQuestions.value) return 0;
-  return (currentIndex.value - 1 + QUESTIONS.length) % QUESTIONS.length;
-});
-
 function getQuestion(index: number): string {
   if (!hasQuestions.value) return '';
   return QUESTIONS[index % QUESTIONS.length]!;
@@ -88,10 +83,20 @@ function animateToIndex(
     return;
   }
 
+  const normalizedTarget = (targetIndex + QUESTIONS.length) % QUESTIONS.length;
+
   isAnimating.value = true;
   direction.value = dir;
+  // The card that is currently visible becomes the exiting card.
   exitingIndex.value = displayIndex.value;
-  backgroundIndex.value = (targetIndex + QUESTIONS.length) % QUESTIONS.length;
+  // Immediately prepare the next card underneath so it is visible
+  // as soon as the exiting animation begins.
+  backgroundIndex.value = normalizedTarget;
+  // Logically advance to the target card right away so all computed
+  // values (like next/previous indices and glows) are up to date,
+  // while the exiting card still appears on top via `foregroundIndex`.
+  currentIndex.value = normalizedTarget;
+  displayIndex.value = normalizedTarget;
 
   const offDeck =
     dir === 'next'
@@ -118,10 +123,6 @@ function animateToIndex(
     if (options?.markAskedAfterExit && options.sourceIndex != null) {
       markAsked(options.sourceIndex);
     }
-    // Commit the logical current card while the exiting card is still animating,
-    // but keep showing the exiting card on top via foregroundIndex.
-    currentIndex.value = (targetIndex + QUESTIONS.length) % QUESTIONS.length;
-    displayIndex.value = currentIndex.value;
     gsap.set(el, { zIndex: 15 });
   });
 
@@ -220,7 +221,7 @@ onUnmounted(() => {
       <div
         v-if="hasQuestions"
         class="absolute inset-0 rounded-xl flex items-center w-full"
-        :class="[getCardColor(backgroundIndex)]"
+        :class="[getCardColor(backgroundIndex).background]"
         :style="{
           filter:
             isAsked(backgroundIndex) &&
