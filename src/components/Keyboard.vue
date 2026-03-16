@@ -8,6 +8,8 @@ defineProps<{
   rows: Letter[][];
   shiftHeld: boolean;
   getActivePlays: (letter: Letter) => { id: string; progress: number }[];
+  loadedSoundsCount: number;
+  totalSounds: number;
 }>();
 
 const emit = defineEmits<{
@@ -25,7 +27,15 @@ function onStop(letter: Letter) {
 </script>
 
 <template>
-  <div class="relative w-full max-w-3xl">
+  <div class="relative w-full">
+    <div class="mb-24 text-sm leading-tight text-yellow/80 max-w-sm">
+      <h2 class="text-md font-bold underline mb-1">Instructions</h2>
+      <p class="">
+        Click a button or use the keyboard to play sounds. Repeat clicks trigger
+        multiple plays. Hold <span class="font-bold">shift</span> to silence a
+        sound. Press <span class="font-bold">escape</span> to stop all sounds.
+      </p>
+    </div>
     <!-- Loading overlay -->
     <div
       v-if="loading"
@@ -37,7 +47,12 @@ function onStop(letter: Letter) {
         class="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-600"
         aria-hidden
       />
-      <p class="text-sm font-medium text-gray-600">Loading sounds…</p>
+      <p class="text-sm font-medium text-gray-600">
+        Loading sounds…
+        <span v-if="totalSounds > 0">
+          {{ loadedSoundsCount }}/{{ totalSounds }}
+        </span>
+      </p>
     </div>
 
     <!-- Keyboard grid: 4 rows, space bar spans bottom -->
@@ -71,14 +86,6 @@ function onStop(letter: Letter) {
           />
         </div>
       </template>
-    </div>
-    <div class="mt-16 text-sm leading-tight text-yellow/80 max-w-sm mx-auto">
-      <h2 class="text-md font-bold underline mb-1">Instructions</h2>
-      <p class="">
-        Click a button or use the keyboard to play sounds. Repeat clicks trigger
-        multiple plays. Hold <span class="font-bold">shift</span> to silence a
-        sound. Press <span class="font-bold">escape</span> to stop all sounds.
-      </p>
     </div>
   </div>
 </template>

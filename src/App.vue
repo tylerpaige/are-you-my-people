@@ -13,6 +13,8 @@ const {
   fadeOutAll,
   getActivePlays,
   hasAnyActivePlays,
+  totalSounds,
+  loadedSoundsCount,
 } = useSoundboard();
 const shiftHeld = ref(false);
 
@@ -70,7 +72,7 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-screen bg-brown px-4 py-6">
-    <h1 class="font-ranchers mb-6 text-center text-2xl md:text-4xl">
+    <h1 class="font-ranchers mb-4 text-2xl leading-none md:text-4xl md:mb-3">
       <span class="text-blue">Are</span
       ><span class="text-red text-[2em]">You</span>
       <br />
@@ -89,6 +91,8 @@ onUnmounted(() => {
         :rows="QWERTY_ROWS"
         :shift-held="shiftHeld"
         :get-active-plays="getActivePlays"
+        :loaded-sounds-count="loadedSoundsCount"
+        :total-sounds="totalSounds"
         @play="play"
         @stop="handleStop"
       />
@@ -100,6 +104,8 @@ onUnmounted(() => {
         :loading="loading"
         :shift-held="shiftHeld"
         :get-active-plays="getActivePlays"
+        :loaded-sounds-count="loadedSoundsCount"
+        :total-sounds="totalSounds"
         @play="play"
         @stop="handleStop"
       />

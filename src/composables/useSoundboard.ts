@@ -2,7 +2,7 @@ import { ref, reactive, computed } from 'vue';
 import gsap from 'gsap';
 import { getKeyDefinition, KEY_CONFIG, Letter, LETTERS } from '../lib/config';
 
-const FADEOUT_MS = 500;
+const FADEOUT_MS = 1000;
 
 export interface ActivePlay {
   id: string;
@@ -25,13 +25,14 @@ export function useSoundboard() {
   const fadeOutProgressById = reactive<Record<string, number>>({});
   const durationsByUrl = reactive<Record<string, number>>({});
 
-  LETTERS.forEach((letter) => {
-    activePlaysByKey[letter] = [];
-  });
-
   const lettersWithSound = Object.values(KEY_CONFIG).filter(
     (config) => config.soundUrl
   );
+  const totalSounds = lettersWithSound.length;
+
+  LETTERS.forEach((letter) => {
+    activePlaysByKey[letter] = [];
+  });
 
   function preload() {
     const promises = lettersWithSound.map((definition) => {
@@ -181,6 +182,8 @@ export function useSoundboard() {
     progressById,
     getActivePlays,
     durationsByUrl,
+    totalSounds,
+    loadedSoundsCount: computed(() => Object.keys(durationsByUrl).length),
     preload,
     play,
     fadeOut,
