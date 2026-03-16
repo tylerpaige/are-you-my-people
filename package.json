@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "reencode:sounds": "node scripts/reencode-sounds-for-web.js",
-    "reencode:sounds:performant": "node scripts/reencode-sounds-performant.js"
+    "reencode:sounds:performant": "node scripts/reencode-sounds-performant.js",
+    "normalize:sounds": "node scripts/normalize-sounds.js"
   },
   "dependencies": {
     "gsap": "^3.14.2",
