@@ -60,6 +60,7 @@ export function useSoundboard() {
         audio.load();
       });
     });
+
     return Promise.all(promises).then(() => {
       loading.value = false;
     });
@@ -176,6 +177,13 @@ export function useSoundboard() {
     LETTERS.some((letter) => (activePlaysByKey[letter]?.length ?? 0) > 0)
   );
 
+  const loadedSoundsCount = computed(
+    () => Object.keys(durationsByUrl).length
+  );
+  const allSoundsLoaded = computed(
+    () => totalSounds > 0 && loadedSoundsCount.value >= totalSounds
+  );
+
   return {
     loading,
     activePlaysByKey,
@@ -183,7 +191,8 @@ export function useSoundboard() {
     getActivePlays,
     durationsByUrl,
     totalSounds,
-    loadedSoundsCount: computed(() => Object.keys(durationsByUrl).length),
+    loadedSoundsCount,
+    allSoundsLoaded,
     preload,
     play,
     fadeOut,

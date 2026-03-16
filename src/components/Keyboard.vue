@@ -1,21 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { Letter } from '../lib/config';
 import Key from './Key.vue';
 import { getKeyDefinition } from '../lib/config';
 
-defineProps<{
+const props = defineProps<{
   loading: boolean;
   rows: Letter[][];
   shiftHeld: boolean;
   getActivePlays: (letter: Letter) => { id: string; progress: number }[];
   loadedSoundsCount: number;
   totalSounds: number;
+  allSoundsLoaded: boolean;
 }>();
 
 const emit = defineEmits<{
   play: [letter: Letter];
   stop: [letter: Letter];
 }>();
+
+const flatLetters = computed(() => props.rows.flat());
+
+function getDelayForLetter(letter: Letter) {
+  const index = flatLetters.value.indexOf(letter);
+  if (index === -1) return 0;
+  return index * 50;
+}
 
 function onPlay(letter: Letter) {
   emit('play', letter);
@@ -36,24 +46,6 @@ function onStop(letter: Letter) {
         sound. Press <span class="font-bold">escape</span> to stop all sounds.
       </p>
     </div>
-    <!-- Loading overlay -->
-    <div
-      v-if="loading"
-      class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 rounded-xl bg-gray-100/90"
-      aria-busy="true"
-      aria-live="polite"
-    >
-      <div
-        class="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-600"
-        aria-hidden
-      />
-      <p class="text-sm font-medium text-gray-600">
-        Loading sounds…
-        <span v-if="totalSounds > 0">
-          {{ loadedSoundsCount }}/{{ totalSounds }}
-        </span>
-      </p>
-    </div>
 
     <!-- Keyboard grid: 4 rows, space bar spans bottom -->
     <div
@@ -62,7 +54,7 @@ function onStop(letter: Letter) {
         'grid gap-[--key-gap] [--key-gap:0.5rem] md:[--key-gap:0.5rem] [--flexible-key-size:calc((100%-var(--key-gap)*9)/10)] [--key-size:clamp(2rem,var(--flexible-key-size),6rem)]')
       "
     >
-      <template v-for="(row, rowIndex) in rows" :key="rowIndex">
+      <template v-for="row in rows" :key="row[0]">
         <div
           class="grid gap-[--key-gap] justify-center"
           :style="{
@@ -81,6 +73,9 @@ function onStop(letter: Letter) {
             "
             :shift-held="shiftHeld"
             class="col-span-1 only:col-span-5 aspect-square only:aspect-[5/1]"
+            :loading-delay-ms="getDelayForLetter(letter)"
+            :animate-loading="true"
+            :all-sounds-loaded="allSoundsLoaded"
             @play="onPlay(getKeyDefinition(letter).letter)"
             @stop="onStop(getKeyDefinition(letter).letter)"
           />

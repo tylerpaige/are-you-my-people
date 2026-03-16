@@ -11,6 +11,7 @@ const props = defineProps<{
   ) => { id: string; progress: number; fadeOutProgress?: number }[];
   loadedSoundsCount: number;
   totalSounds: number;
+  allSoundsLoaded: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -18,8 +19,14 @@ const emit = defineEmits<{
   stop: [letter: Letter];
 }>();
 
-/** Keys in QWERTY order (row by row), excluding Space (fixed bar). */
+/** Keys in QWERTY order (row by row), including Space for consistent animation offsets. */
 const lettersInQwertyOrder = computed(() => QWERTY_ROWS.flat());
+
+function getDelayForLetter(letter: Letter) {
+  const index = lettersInQwertyOrder.value.indexOf(letter);
+  if (index === -1) return 0;
+  return index * 50;
+}
 
 function onPlay(letter: Letter) {
   emit('play', letter);
@@ -40,25 +47,6 @@ function onStop(letter: Letter) {
       </p>
     </div>
 
-    <!-- Loading overlay -->
-    <div
-      v-if="loading"
-      class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 rounded-xl bg-gray-100/90 py-12"
-      aria-busy="true"
-      aria-live="polite"
-    >
-      <div
-        class="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-600"
-        aria-hidden
-      />
-      <p class="text-sm font-medium text-gray-600">
-        Loading sounds…
-        <span v-if="props.totalSounds > 0">
-          {{ props.loadedSoundsCount }}/{{ props.totalSounds }}
-        </span>
-      </p>
-    </div>
-
     <!-- 4 square keys per row; label/sublabel centered; fadeout inset bottom-right at 1/4 size -->
     <div
       class="grid grid-cols-4 gap-3"
@@ -74,6 +62,9 @@ function onStop(letter: Letter) {
             :shift-held="shiftHeld"
             center-label
             class="absolute inset-0 h-full w-full rounded-lg"
+            :loading-delay-ms="getDelayForLetter(letter)"
+            :animate-loading="true"
+            :all-sounds-loaded="allSoundsLoaded"
             @play="onPlay(letter)"
             @stop="onStop(letter)"
           />

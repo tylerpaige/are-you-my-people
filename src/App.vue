@@ -15,6 +15,7 @@ const {
   hasAnyActivePlays,
   totalSounds,
   loadedSoundsCount,
+  allSoundsLoaded,
 } = useSoundboard();
 const shiftHeld = ref(false);
 
@@ -93,6 +94,7 @@ onUnmounted(() => {
         :get-active-plays="getActivePlays"
         :loaded-sounds-count="loadedSoundsCount"
         :total-sounds="totalSounds"
+        :all-sounds-loaded="allSoundsLoaded"
         @play="play"
         @stop="handleStop"
       />
@@ -106,6 +108,7 @@ onUnmounted(() => {
         :get-active-plays="getActivePlays"
         :loaded-sounds-count="loadedSoundsCount"
         :total-sounds="totalSounds"
+        :all-sounds-loaded="allSoundsLoaded"
         @play="play"
         @stop="handleStop"
       />
