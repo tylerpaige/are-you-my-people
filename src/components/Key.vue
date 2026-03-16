@@ -55,6 +55,10 @@ function settleToFinalKeyBg() {
       backgroundColor: 'rgba(235, 238, 210, 1)',
       duration: 0.6,
       ease: 'power1.inOut',
+      onComplete: () => {
+        // Let Tailwind-controlled classes own the final background color
+        target.style.removeProperty('background-color');
+      },
     });
   }
   loadingAnimationStopped.value = true;
@@ -151,7 +155,9 @@ function onClick(e: MouseEvent) {
       centerLabel ? 'text-center' : 'text-left',
       shiftHeld && !disabled
         ? ' bg-key-shift hover:bg-key-shift/90 active:bg-key-shift/80 ring-2 ring-key-shift/50'
-        : ' bg-key-bg/20 hover:bg-key-bg/90 active:bg-key-bg/80',
+        : loadingAnimationStopped
+          ? ' bg-key-bg hover:bg-key-bg/90 active:bg-key-bg/80'
+          : ' bg-key-bg/20 hover:bg-key-bg/90 active:bg-key-bg/80',
     ]"
     :disabled="disabled"
     :title="
@@ -172,15 +178,27 @@ function onClick(e: MouseEvent) {
       </span>
     </template>
     <template v-else>
-      <span
-        class="relative z-10 font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none"
-        >{{ label }}</span
+      <div
+        class="relative z-10 flex flex-col items-center"
+        :style="{
+          opacity: !animateLoading || loadingAnimationStopped ? 1 : 0,
+          transition: 'opacity 0.4s ease-out',
+          transitionDelay:
+            animateLoading && loadingAnimationStopped
+              ? `${loadingDelayMs}ms`
+              : '0s',
+        }"
       >
-      <span
-        v-if="sublabel && !(shiftHeld && !disabled)"
-        class="relative z-10 truncate text-xs text-gray-500"
-        >{{ sublabel }}</span
-      >
+        <span
+          class="font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none"
+          >{{ label }}</span
+        >
+        <span
+          v-if="sublabel && !(shiftHeld && !disabled)"
+          class="truncate text-xs text-gray-500"
+          >{{ sublabel }}</span
+        >
+      </div>
       <span
         v-if="shiftHeld && !disabled"
         class="relative z-10 text-xs font-medium"
