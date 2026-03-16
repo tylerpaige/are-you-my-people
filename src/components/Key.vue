@@ -41,6 +41,14 @@ const loadingAnimationStopped = ref(false);
 const keyEl = ref<HTMLElement | null>(null);
 let loadingTimeline: gsap.core.Timeline | null = null;
 
+function getPlayColorClass(play: ActivePlay) {
+  const bucket = play.colorIndex % 4;
+  if (bucket === 0) return 'bg-blue';
+  if (bucket === 1) return 'bg-green';
+  if (bucket === 2) return 'bg-yellow';
+  return 'bg-red/40';
+}
+
 function killLoadingTimeline() {
   if (loadingTimeline) {
     loadingTimeline.kill();
@@ -210,7 +218,8 @@ function onClick(e: MouseEvent) {
     <!-- One overlay per active play; width = progress%; opacity fades in sync with audio fadeout -->
     <template v-for="(play, i) in activePlays" :key="play.id">
       <div
-        class="absolute left-0 z-[1] bg-black/30 transition-[width] duration-75"
+        class="absolute left-0 z-[1] transition-[width] duration-75"
+        :class="getPlayColorClass(play)"
         :style="{
           width: `${(play.progress ?? 0) * 100}%`,
           height:

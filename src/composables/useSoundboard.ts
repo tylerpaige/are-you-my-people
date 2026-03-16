@@ -8,6 +8,7 @@ export interface ActivePlay {
   id: string;
   progress: number;
   fadeOutProgress?: number;
+  colorIndex: number;
 }
 
 interface PlayEntry {
@@ -16,6 +17,7 @@ interface PlayEntry {
   startedAt: number;
   duration: number;
   progressTween: gsap.core.Tween;
+  colorIndex: number;
 }
 
 export function useSoundboard() {
@@ -24,6 +26,7 @@ export function useSoundboard() {
   const progressById = reactive<Record<string, number>>({});
   const fadeOutProgressById = reactive<Record<string, number>>({});
   const durationsByUrl = reactive<Record<string, number>>({});
+  const nextColorIndexByKey = reactive<Record<string, number>>({});
 
   const lettersWithSound = Object.values(KEY_CONFIG).filter(
     (config) => config.soundUrl
@@ -32,6 +35,7 @@ export function useSoundboard() {
 
   LETTERS.forEach((letter) => {
     activePlaysByKey[letter] = [];
+    nextColorIndexByKey[letter] = 0;
   });
 
   function preload() {
@@ -96,8 +100,11 @@ export function useSoundboard() {
       onComplete: remove,
     });
 
+    const colorIndex = nextColorIndexByKey[letter] ?? 0;
+    nextColorIndexByKey[letter] = (colorIndex + 1) % 4;
+
     const plays = activePlaysByKey[letter];
-    if (plays) plays.push({ id, audio, startedAt, duration, progressTween });
+    if (plays) plays.push({ id, audio, startedAt, duration, progressTween, colorIndex });
 
     audio.addEventListener('ended', remove, { once: true });
     audio.play().catch(() => {
@@ -162,6 +169,7 @@ export function useSoundboard() {
       id: p.id,
       progress: progressById[p.id] ?? 0,
       fadeOutProgress: fadeOutProgressById[p.id] ?? 0,
+      colorIndex: p.colorIndex,
     }));
   }
 
