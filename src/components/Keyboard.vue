@@ -50,19 +50,14 @@ function onStop(letter: Letter) {
 
     <!-- Keyboard grid: 4 rows, space bar spans bottom -->
     <div
-      class="
-        grid gap-[--key-gap]
-        [--key-gap:0.5rem] md:[--key-gap:0.5rem]
-        [--flexible-key-size:calc((100%-var(--key-gap)*9)/10)]
-        [--key-size:clamp(2rem,var(--flexible-key-size),6rem)]
-      "
+      class="grid gap-(--key-gap) [--key-gap:0.5rem] md:[--key-gap:0.5rem] [--flexible-key-size:calc((100%-var(--key-gap)*9)/10)] [--key-size:clamp(2rem,var(--flexible-key-size),6rem)]"
       :class="{
         'pointer-events-none opacity-60': loading,
       }"
     >
       <template v-for="row in rows" :key="row[0]">
         <div
-          class="grid justify-center gap-[--key-gap]"
+          class="grid justify-center gap-(--key-gap)"
           :style="{
             gridTemplateColumns: `repeat(${row.length > 1 ? row.length : 5}, var(--key-size))`,
           }"
@@ -76,7 +71,7 @@ function onStop(letter: Letter) {
             :active-plays="getActivePlays(getKeyDefinition(letter).letter)"
             :disabled="letter !== 'Space' && !getKeyDefinition(letter).soundUrl"
             :shift-held="shiftHeld"
-            class="col-span-1 aspect-square only:col-span-5 only:aspect-[5/1]"
+            class="col-span-1 aspect-square only:col-span-5 only:aspect-5/1"
             :loading-delay-ms="getDelayForLetter(letter)"
             :animate-loading="true"
             :all-sounds-loaded="allSoundsLoaded"
