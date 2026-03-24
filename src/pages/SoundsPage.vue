@@ -44,7 +44,7 @@ const {
 const ASK_SLOTS: QuestionAskSlot[] = [1, 2, 3, 4, 5];
 
 function onApplauseClick() {
-  play('J');
+  play('D');
   publishApplause();
 }
 
@@ -250,26 +250,21 @@ onUnmounted(() => {
       style="padding-bottom: env(safe-area-inset-bottom, 0px)"
     >
       <div
-        v-if="hasAnyActivePlays"
-        class="flex h-14 shrink-0 items-center justify-center border-t border-orange bg-orange"
+        class="px-3 py-3 flex flex-col gap-2 bg-brown border-t border-orange"
       >
         <button
           type="button"
-          class="h-full w-full font-medium transition hover:bg-orange/90 active:bg-orange/80"
+          class="h-14 w-full font-medium transition bg-orange rounded-lg hover:bg-orange/90 active:bg-orange/80"
           style="color: #1a1a1a; touch-action: manipulation"
           aria-label="Pause all sounds"
           @click="fadeOutAll"
+          v-if="hasAnyActivePlays"
         >
-          Pause all sounds
+          Stop All Sounds
         </button>
-      </div>
-
-      <div
-        class="flex h-14 shrink-0 items-center justify-center border-t border-orange bg-yellow"
-      >
         <button
           type="button"
-          class="h-full w-full font-medium transition hover:bg-yellow/90 active:bg-yellow/80"
+          class="h-14 w-full font-medium transition bg-yellow rounded-lg hover:bg-yellow/90 active:bg-yellow/80"
           style="color: #1a1a1a; touch-action: manipulation"
           aria-label="Applause"
           @click="onApplauseClick"
