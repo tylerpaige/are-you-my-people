@@ -163,15 +163,15 @@ function triggerGlow(side: 'left' | 'right') {
 function handleKeydown(e: KeyboardEvent) {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
 
-  if (e.key === 'ArrowRight') {
-    e.preventDefault();
-    triggerGlow('right');
-    markAskedAndNext();
-    return;
-  }
   if (e.key === 'ArrowLeft') {
     e.preventDefault();
     triggerGlow('left');
+    markAskedAndNext();
+    return;
+  }
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    triggerGlow('right');
     skipCurrent();
     return;
   }
@@ -179,10 +179,10 @@ function handleKeydown(e: KeyboardEvent) {
   if (e.code === 'Space' || e.key === ' ') {
     e.preventDefault();
     if (e.shiftKey) {
-      triggerGlow('left');
+      triggerGlow('right');
       skipCurrent();
     } else {
-      triggerGlow('right');
+      triggerGlow('left');
       markAskedAndNext();
     }
   }
@@ -285,7 +285,7 @@ onUnmounted(() => {
         @click="
           () => {
             triggerGlow('left');
-            skipCurrent();
+            markAskedAndNext();
           }
         "
       />
@@ -297,7 +297,7 @@ onUnmounted(() => {
         @click="
           () => {
             triggerGlow('right');
-            markAskedAndNext();
+            skipCurrent();
           }
         "
       />

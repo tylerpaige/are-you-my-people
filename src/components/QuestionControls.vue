@@ -14,10 +14,10 @@ const emit = defineEmits<{
       type="button"
       class="font-ranchers text-3xl uppercase md:text-4xl leading-none px-4 py-2 rounded-full hover:scale-105 active:scale-95 transition-transform duration-150 select-none"
       style="touch-action: manipulation"
-      aria-label="Skip question"
-      @click="emit('skip')"
+      aria-label="Mark asked and go to next question"
+      @click="emit('asked')"
     >
-      skip
+      Asked
     </button>
 
     <div class="flex-1 flex justify-center">
@@ -28,10 +28,10 @@ const emit = defineEmits<{
       type="button"
       class="font-ranchers text-3xl uppercase md:text-4xl leading-none px-4 py-2 rounded-full hover:scale-105 active:scale-95 transition-transform duration-150 select-none"
       style="touch-action: manipulation"
-      aria-label="Mark asked and go to next question"
-      @click="emit('asked')"
+      aria-label="Skip question"
+      @click="emit('skip')"
     >
-      asked
+      Skip
     </button>
   </div>
 </template>
