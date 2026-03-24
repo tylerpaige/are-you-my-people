@@ -19,6 +19,18 @@ const COLORS: CardColor[] = [
   { background: 'bg-red', text: 'text-white', nextGlow: 'to-red' },
 ];
 
+
+function shuffleQuestions(questions: string[]): string[] {
+  const shuffled = [...questions];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+  }
+  return shuffled;
+}
+
+const shuffledQuestions = ref<string[]>(QUESTIONS);
+
 const currentIndex = ref(0);
 const displayIndex = ref(0);
 const direction = ref<'next' | 'prev'>('next');
@@ -30,24 +42,26 @@ const leftGlowEl = ref<HTMLElement | null>(null);
 const rightGlowEl = ref<HTMLElement | null>(null);
 const backgroundIndex = ref(0);
 
-const hasQuestions = computed(() => QUESTIONS.length > 0);
+const hasQuestions = computed(() => shuffledQuestions.value.length > 0);
 
 const foregroundIndex = computed(() =>
   exitingIndex.value !== null ? exitingIndex.value : displayIndex.value
 );
 
 const foregroundQuestion = computed(() =>
-  hasQuestions.value ? QUESTIONS[foregroundIndex.value % QUESTIONS.length] : ''
+  hasQuestions.value
+    ? shuffledQuestions.value[foregroundIndex.value % shuffledQuestions.value.length]
+    : ''
 );
 
 const nextIndex = computed(() => {
   if (!hasQuestions.value) return 0;
-  return (currentIndex.value + 1) % QUESTIONS.length;
+  return (currentIndex.value + 1) % shuffledQuestions.value.length;
 });
 
 function getQuestion(index: number): string {
   if (!hasQuestions.value) return '';
-  return QUESTIONS[index % QUESTIONS.length]!;
+  return shuffledQuestions.value[index % shuffledQuestions.value.length]!;
 }
 
 function getCardColor(index: number): CardColor {
@@ -57,11 +71,11 @@ function getCardColor(index: number): CardColor {
 }
 
 function isAsked(index: number): boolean {
-  return askedIndices.value.includes(index % QUESTIONS.length);
+  return askedIndices.value.includes(index % shuffledQuestions.value.length);
 }
 
 function markAsked(index: number) {
-  const normalized = index % QUESTIONS.length;
+  const normalized = index % shuffledQuestions.value.length;
   if (!askedIndices.value.includes(normalized)) {
     askedIndices.value = [...askedIndices.value, normalized];
   }
@@ -78,12 +92,14 @@ function animateToIndex(
     if (options?.markAskedAfterExit && options.sourceIndex != null) {
       markAsked(options.sourceIndex);
     }
-    currentIndex.value = (targetIndex + QUESTIONS.length) % QUESTIONS.length;
+    currentIndex.value =
+      (targetIndex + shuffledQuestions.value.length) % shuffledQuestions.value.length;
     displayIndex.value = currentIndex.value;
     return;
   }
 
-  const normalizedTarget = (targetIndex + QUESTIONS.length) % QUESTIONS.length;
+  const normalizedTarget =
+    (targetIndex + shuffledQuestions.value.length) % shuffledQuestions.value.length;
 
   isAnimating.value = true;
   direction.value = dir;
@@ -189,6 +205,9 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  if (QUESTIONS.length > 1) {
+    shuffledQuestions.value = shuffleQuestions(QUESTIONS);
+  }
   window.addEventListener('keydown', handleKeydown);
 });
 
