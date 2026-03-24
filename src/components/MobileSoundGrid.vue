@@ -23,10 +23,12 @@ const lettersInQwertyOrder = computed(() => QWERTY_ROWS.flat());
 
 /** Mobile grid: only keys that have a sound and are not marked hidden. */
 const lettersToShow = computed(() =>
-  lettersInQwertyOrder.value.filter((letter) => {
-    const def = getKeyDefinition(letter);
-    return Boolean(def.soundUrl) && !def.hidden;
-  })
+  lettersInQwertyOrder.value
+    .filter((letter) => {
+      const def = getKeyDefinition(letter);
+      return Boolean(def.soundUrl) && !def.hidden;
+    })
+    .reverse()
 );
 
 function getDelayForLetter(letter: Letter) {
