@@ -1,5 +1,9 @@
 import { computed, reactive, ref } from 'vue';
-import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js';
+import {
+  createClient,
+  type RealtimeChannel,
+  type SupabaseClient,
+} from '@supabase/supabase-js';
 import { QUESTIONS, getKeyDefinition, type Letter } from '../lib/config';
 
 export interface QuestionChangedEvent {
@@ -20,7 +24,7 @@ export interface SoundStopEvent {
   timestamp: number;
 }
 
-type FeedEvent = QuestionChangedEvent | SoundPlayEvent | SoundStopEvent;
+export type FeedEvent = QuestionChangedEvent | SoundPlayEvent | SoundStopEvent;
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as
@@ -71,7 +75,7 @@ const currentQuestionIndex = ref<number | null>(null);
 
 // Track active letters in a reactive record for good reactivity.
 const activeLettersRecord = reactive<Record<Letter, boolean>>(
-  {} as Record<Letter, boolean>,
+  {} as Record<Letter, boolean>
 );
 
 function applyQuestionChangedLocally(index: number) {
@@ -186,7 +190,7 @@ export function useFeedConsumer() {
       if (!(letter in activeLettersRecord)) {
         activeLettersRecord[letter] = false;
       }
-    },
+    }
   );
 
   subscribeIfNeeded();
@@ -206,12 +210,12 @@ export function useFeedConsumer() {
 
   const activeLettersList = computed<Letter[]>(() =>
     (Object.keys(activeLettersRecord) as Letter[]).filter(
-      (letter) => activeLettersRecord[letter],
-    ),
+      (letter) => activeLettersRecord[letter]
+    )
   );
 
-  const activeLetterDefinitions = computed(
-    () => activeLettersList.value.map((letter) => getKeyDefinition(letter)),
+  const activeLetterDefinitions = computed(() =>
+    activeLettersList.value.map((letter) => getKeyDefinition(letter))
   );
 
   return {
@@ -221,4 +225,3 @@ export function useFeedConsumer() {
     activeLetterDefinitions,
   };
 }
-
