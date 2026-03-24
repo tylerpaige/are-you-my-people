@@ -9,7 +9,11 @@ import {
   useFeedProducer,
   type QuestionAskSlot,
 } from '../composables/useRealtimeFeed';
-import { KEY_CODE_TO_DEFINITION, QWERTY_ROWS, type Letter } from '../lib/config';
+import {
+  KEY_CODE_TO_DEFINITION,
+  QWERTY_ROWS,
+  type Letter,
+} from '../lib/config';
 
 const {
   loading,
@@ -29,8 +33,6 @@ const shiftHeld = ref(false);
 
 const { questionAskCounts } = useFeedConsumer();
 const {
-  publishSoundPlay,
-  publishSoundStop,
   publishApplause,
   publishQuestionAskIncrement,
   publishQuestionAskReset,
@@ -152,14 +154,6 @@ function handleKeydown(e: KeyboardEvent) {
   } else {
     play(definition.letter);
   }
-
-  if (definition?.letter) {
-    if (e.shiftKey) {
-      publishSoundStop(definition.letter);
-    } else {
-      publishSoundPlay(definition.letter);
-    }
-  }
 }
 
 function handleStop(letter: Letter) {
@@ -168,8 +162,6 @@ function handleStop(letter: Letter) {
   } else {
     fadeOut(letter);
   }
-
-  publishSoundStop(letter);
 }
 
 function handleKeyup(e: KeyboardEvent) {
@@ -254,7 +246,9 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <div class="flex h-14 shrink-0 items-center justify-center border-t border-orange bg-yellow">
+      <div
+        class="flex h-14 shrink-0 items-center justify-center border-t border-orange bg-yellow"
+      >
         <button
           type="button"
           class="h-full w-full font-medium transition hover:bg-yellow/90 active:bg-yellow/80"
@@ -330,4 +324,3 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
-

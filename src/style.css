@@ -1,7 +1,24 @@
 @import 'tailwindcss';
 
+/* Viewport width/height ratio: e.g. portrait-ish vs 16:9 and wider */
+@custom-variant orientation-lt-video (@media (max-aspect-ratio: 16/9));
+@custom-variant orientation-gte-video (@media (min-aspect-ratio: 16/9));
+
+@keyframes applause-blink {
+  0%,
+  49.99% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @theme {
   --font-ranchers: 'Ranchers', cursive;
+
+  --animate-applause-blink: applause-blink 0.75s linear infinite;
 
   --color-brown: #4e1d1f;
   --color-green: #a0dd87;
@@ -26,4 +43,11 @@ button {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-applause-blink {
+    animation: none;
+    opacity: 1;
+  }
 }

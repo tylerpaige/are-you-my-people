@@ -1,18 +1,79 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import gsap from 'gsap';
 import Logo from '../components/Logo.vue';
-import { KEY_CONFIG, type Letter } from '../lib/config';
 import { useFeedConsumer } from '../composables/useRealtimeFeed';
+import {
+  createFeedLogo70sTimeline,
+  FEED_LOGO_70S_DEFAULT_TIMINGS,
+} from '../lib/createFeedLogo70sTimeline';
 
-const {
-  currentQuestion,
-  activeLetterDefinitions,
-  activeLettersList,
-  lastApplauseAt,
-} = useFeedConsumer();
+const { lastApplauseAt } = useFeedConsumer();
 
 const showApplauseFlash = ref(false);
 let applauseFlashTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Tweak timings here or pass a partial override to `createFeedLogo70sTimeline`. */
+const feedLogoTimings = { ...FEED_LOGO_70S_DEFAULT_TIMINGS };
+
+const feedLogoEl = ref<HTMLElement | null>(null);
+let feedLogoTimeline: gsap.core.Timeline | null = null;
+let motionMql: MediaQueryList | null = null;
+
+function stopFeedLogoAnim() {
+  if (feedLogoTimeline) {
+    feedLogoTimeline.kill();
+    feedLogoTimeline = null;
+  }
+  const el = feedLogoEl.value;
+  if (el) gsap.killTweensOf(el);
+}
+
+function startFeedLogoAnim() {
+  stopFeedLogoAnim();
+  const el = feedLogoEl.value;
+  if (!el || showApplauseFlash.value) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.set(el, {
+      position: 'fixed',
+      left: '50%',
+      top: '50%',
+      xPercent: -50,
+      yPercent: -50,
+      opacity: 1,
+      scale: 1,
+      rotation: 0,
+      x: 0,
+      y: 0,
+      zIndex: 20,
+    });
+    return;
+  }
+
+  feedLogoTimeline = createFeedLogo70sTimeline(el, feedLogoTimings);
+}
+
+function onReducedMotionChange() {
+  if (!showApplauseFlash.value) {
+    nextTick(() => startFeedLogoAnim());
+  }
+}
+
+watch(
+  () => [showApplauseFlash.value, feedLogoEl.value] as const,
+  ([flash, el]) => {
+    if (flash || !el) {
+      stopFeedLogoAnim();
+      return;
+    }
+    nextTick(() => {
+      if (feedLogoEl.value !== el) return;
+      startFeedLogoAnim();
+    });
+  },
+  { flush: 'post', immediate: true },
+);
 
 watch(lastApplauseAt, () => {
   if (lastApplauseAt.value == null) return;
@@ -21,125 +82,74 @@ watch(lastApplauseAt, () => {
   applauseFlashTimer = setTimeout(() => {
     showApplauseFlash.value = false;
     applauseFlashTimer = null;
-  }, 2800);
+  }, 4500);
+});
+
+onMounted(() => {
+  motionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  motionMql.addEventListener('change', onReducedMotionChange);
 });
 
 onUnmounted(() => {
+  motionMql?.removeEventListener('change', onReducedMotionChange);
+  motionMql = null;
+  stopFeedLogoAnim();
   if (applauseFlashTimer) clearTimeout(applauseFlashTimer);
 });
-
-function getDisplayLabel(letter: Letter) {
-  const def = KEY_CONFIG[letter];
-  return def?.label || letter;
-}
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-brown text-white flex flex-col select-none overflow-hidden px-4 py-6 md:px-8 md:py-10"
+    class="min-h-screen bg-brown text-white flex flex-col justify-center items-center select-none overflow-hidden"
   >
-    <header class="mb-10 flex items-center justify-between gap-4">
-      <Logo />
-    </header>
+    <!-- Background YouTube video -->
+    <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
+      <iframe
+        class="absolute aspect-video left-1/2 top-1/2 z-0 opacity-20 pointer-events-none -translate-x-1/2 -translate-y-1/2 orientation-lt-video:h-full orientation-lt-video:w-auto orientation-gte-video:w-full orientation-gte-video:h-auto"
+        src="https://www.youtube.com/embed/iAtNl85CCIg?autoplay=1&mute=1&loop=1&controls=0&playlist=iAtNl85CCIg&modestbranding=1&playsinline=1&rel=0&fs=0&disablekb=1"
+        title="Background video"
+        frameborder="0"
+        allow="autoplay; encrypted-media; picture-in-picture"
+      ></iframe>
+    </div>
 
-    <main class="flex-1 flex flex-col gap-10 md:gap-12">
-      <!-- Current question -->
-      <section
-        class="relative flex-1 rounded-2xl overflow-hidden text-[white] shadow-lg px-6 py-6 md:px-10 md:py-10 flex items-center justify-center"
+    <!-- Foreground content -->
+    <div class="relative z-10">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        leave-active-class="transition duration-500 ease-in"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+        v-if="showApplauseFlash"
       >
-        <!-- Background YouTube video -->
-        <div
-          class="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden"
-          aria-hidden="true"
+        <p
+          class="mb-4 font-sans text-2xl font-semibold tracking-wide text-yellow md:text-8xl"
+          aria-live="polite"
         >
-          <iframe
-            class="absolute top-1/2 left-1/2 min-w-full min-h-full -translate-x-1/2 -translate-y-1/2"
-            src="https://www.youtube.com/embed/iAtNl85CCIg?autoplay=1&mute=1&loop=1&controls=0&playlist=iAtNl85CCIg&modestbranding=1&playsinline=1&rel=0&fs=0&disablekb=1"
-            title="Background video"
-            frameborder="0"
-            allow="autoplay; encrypted-media; picture-in-picture"
-          ></iframe>
-        </div>
-
-        <!-- Foreground content -->
-        <div class="relative z-10 w-full max-w-3xl text-center">
-          <Transition
-            enter-active-class="transition duration-300 ease-out"
-            leave-active-class="transition duration-500 ease-in"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
-          >
-            <p
-              v-if="showApplauseFlash"
-              class="mb-4 font-sans text-2xl font-semibold tracking-wide text-yellow md:text-3xl"
-              aria-live="polite"
-            >
-              Applause
-            </p>
-          </Transition>
-          <h2 class="mb-3 text-xs font-semibold uppercase tracking-[0.16em]">
-            Current question
-          </h2>
-          <p
-            v-if="currentQuestion"
-            class="whitespace-pre-wrap font-sans text-lgleading-tight md:text-2xl"
-          >
-            {{ currentQuestion }}
-          </p>
-          <p
-            v-else
-            class="font-sans text-lg leading-relaxed md:text-2xl md:leading-relaxed opacity-70"
-          >
-            Waiting for a question&mdash;open the questions view on another
-            device to get started.
-          </p>
-        </div>
-      </section>
-
-      <!-- Currently playing sounds -->
-      <section class="mt-auto">
-        <div class="mb-2 flex items-center justify-between text-xs md:text-sm">
-          <h2 class="font-semibold uppercase tracking-[0.16em] text-yellow/80">
-            Sounds playing now
-          </h2>
-          <p class="text-yellow/60">
-            {{
-              activeLettersList.length === 0
-                ? 'No sounds playing'
-                : activeLettersList.length === 1
-                  ? '1 sound playing'
-                  : `${activeLettersList.length} sounds playing`
-            }}
-          </p>
-        </div>
-
-        <div
-          v-if="activeLetterDefinitions.length > 0"
-          class="flex flex-wrap gap-2 rounded-2xl bg-black/10 px-3 py-3 md:px-4 md:py-4"
-        >
-          <div
-            v-for="def in activeLetterDefinitions"
-            :key="def.letter"
-            class="inline-flex items-center gap-2 rounded-full bg-blue/80 px-3 py-1.5 text-sm md:text-base shadow-sm"
-          >
-            <span class="text-lg leading-none">
-              {{ getDisplayLabel(def.letter) }}
-            </span>
-            <span class="text-xs uppercase tracking-[0.14em] opacity-80">
-              {{ def.letter === 'Space' ? 'Space' : def.letter }}
-            </span>
-          </div>
-        </div>
-        <div
-          v-else
-          class="rounded-2xl bg-black/10 px-4 py-4 text-sm md:text-base text-yellow/70"
-        >
-          When someone plays sounds on another device, they will appear here in
-          real time.
-        </div>
-      </section>
-    </main>
+          <span class="inline-block animate-applause-blink">[Applause]</span>
+        </p>
+      </Transition>
+      <div v-if="!showApplauseFlash" ref="feedLogoEl" class="feed-logo-70s">
+        <Logo />
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.feed-logo-70s {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 20;
+  transform-origin: center center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-logo-70s {
+    transform: translate(-50%, -50%);
+  }
+}
+</style>
