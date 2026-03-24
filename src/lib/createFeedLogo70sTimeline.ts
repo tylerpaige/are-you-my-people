@@ -39,16 +39,16 @@ export interface FeedLogo70sTimings {
 
 export const FEED_LOGO_70S_DEFAULT_TIMINGS: FeedLogo70sTimings = {
   fadeInCentered: 5,
-  holdAfterFadeIn: 3,
+  holdAfterFadeIn: 1.5,
   spinAndShrink: 1,
-  holdAfterSpin: 3,
-  marqueeHorizontal: 12,
-  holdAfterMarqueeH: 3,
+  holdAfterSpin: 0,
+  marqueeHorizontal: 24,
+  holdAfterMarqueeH: 1.5,
   fadeInCentered2: 5,
   wiggleFadeOut: 3,
-  holdAfterWiggle: 3,
+  holdAfterWiggle: 1.5,
   marqueeVertical: 12,
-  holdEnd: 3,
+  holdEnd: 1.5,
   spinTurns: 5,
   wiggleMaxScale: 5,
   marqueeOffsetVw: 105,
@@ -117,13 +117,14 @@ export function createFeedLogo70sTimeline(
 
   // 5: horizontal marquee
   tl.set(el, {
-    scale: 1,
+    scale: 0.5,
     rotation: 0,
     opacity: 1,
     x: `${xMarq}vw`,
     y: 0,
   });
   tl.to(el, {
+    scale: 0.5,
     x: `-${xMarq}vw`,
     duration: t.marqueeHorizontal,
     ease: 'none',
@@ -133,8 +134,9 @@ export function createFeedLogo70sTimeline(
   tl.add(gsap.delayedCall(t.holdAfterMarqueeH, () => {}));
 
   // 7: center + second fade in
-  tl.set(el, { x: 0, y: 0, opacity: 0 });
+  tl.set(el, { x: 0, y: 0, opacity: 0, scale: 1 });
   tl.to(el, {
+    scale: 1,
     opacity: 1,
     duration: t.fadeInCentered2,
     ease: 'power1.inOut',
@@ -195,13 +197,14 @@ export function createFeedLogo70sTimeline(
 
   // 10: vertical marquee
   tl.set(el, {
-    scale: 1,
+    scale: 0.5,
     rotation: 0,
     opacity: 1,
     x: 0,
     y: `-${yMarq}vh`,
   });
   tl.to(el, {
+    scale: 0.5,
     y: `${yMarq}vh`,
     duration: t.marqueeVertical,
     ease: 'none',

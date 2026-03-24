@@ -9,7 +9,7 @@ const props = withDefaults(
 const SIZE_CLASSES: Record<'small' | 'medium' | 'large', string> = {
   small: 'w-full max-w-[6rem] md:max-w-[8rem]',
   medium: 'w-full max-w-[8rem] md:max-w-[10rem]',
-  large: 'w-full max-w-md md:max-w-xl',
+  large: 'w-full max-w-md md:max-w-md',
 };
 
 const widthClass = computed(() => SIZE_CLASSES[props.size]);
