@@ -34,6 +34,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   play: [letter: Letter];
   stop: [letter: Letter];
+  loadingFinished: [letter: Letter];
 }>();
 
 /** When true: finish the current cycle, then settle to key-bg and stop (no more loops). */
@@ -157,6 +158,11 @@ watch(
     }
   }
 );
+
+watch(loadingAnimationStopped, (stopped) => {
+  if (!stopped) return;
+  emit('loadingFinished', props.letter);
+});
 
 onMounted(() => {
   if (props.animateLoading && keyEl.value && !loadingTimeline) {

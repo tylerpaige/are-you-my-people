@@ -16,6 +16,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   play: [letter: Letter];
   stop: [letter: Letter];
+  keysLoadingFinished: [];
 }>();
 
 /** Keys in QWERTY order (row by row), including Space for consistent animation offsets. */
@@ -43,6 +44,15 @@ function onPlay(letter: Letter) {
 
 function onStop(letter: Letter) {
   emit('stop', letter);
+}
+
+const finishedLoadingLetters = new Set<Letter>();
+
+function onKeyLoadingFinished(letter: Letter) {
+  finishedLoadingLetters.add(letter);
+  if (finishedLoadingLetters.size >= lettersToShow.value.length) {
+    emit('keysLoadingFinished');
+  }
 }
 </script>
 
@@ -78,6 +88,7 @@ function onStop(letter: Letter) {
             :all-sounds-loaded="allSoundsLoaded"
             @play="onPlay(letter)"
             @stop="onStop(letter)"
+            @loading-finished="onKeyLoadingFinished(letter)"
           />
         </div>
       </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import Keyboard from '../components/Keyboard.vue';
 import MobileSoundGrid from '../components/MobileSoundGrid.vue';
 import Logo from '../components/Logo.vue';
@@ -32,6 +32,7 @@ const {
   allSoundsLoaded,
 } = useSoundboard();
 const shiftHeld = ref(false);
+const mobileControlsReady = ref(false);
 
 const { questionAskCounts, feedDisplayMode } = useFeedConsumer();
 const {
@@ -50,6 +51,12 @@ function onApplauseClick() {
 
 function setFeedMode(mode: FeedDisplayMode) {
   publishFeedMode(mode);
+}
+
+function onMobileKeysLoadingFinished() {
+  setTimeout(() => {
+    mobileControlsReady.value = true;
+  }, 1000);
 }
 
 // ---- Mobile stopwatch: total (session) vs this question; incrementing a person laps "this question" ----
@@ -186,6 +193,15 @@ onMounted(() => {
   window.addEventListener('keyup', handleKeyup);
 });
 
+watch(
+  () => allSoundsLoaded.value,
+  (loaded) => {
+    if (!loaded) {
+      mobileControlsReady.value = false;
+    }
+  }
+);
+
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
   window.removeEventListener('keyup', handleKeyup);
@@ -230,6 +246,7 @@ onUnmounted(() => {
         :all-sounds-loaded="allSoundsLoaded"
         @play="play"
         @stop="handleStop"
+        @keys-loading-finished="onMobileKeysLoadingFinished"
       />
 
       <div
@@ -246,7 +263,12 @@ onUnmounted(() => {
 
     <!-- Mobile: fixed bottom dock — pause (when playing), applause, stopwatch -->
     <div
-      class="fixed bottom-0 left-0 right-0 z-10 flex flex-col md:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.08)]"
+      class="fixed bottom-0 left-0 right-0 z-10 flex flex-col md:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.08)] transition-all duration-500 ease-out"
+      :class="
+        mobileControlsReady
+          ? 'translate-y-0'
+          : 'translate-y-full'
+      "
       style="padding-bottom: env(safe-area-inset-bottom, 0px)"
     >
       <div
