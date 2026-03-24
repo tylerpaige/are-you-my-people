@@ -32,6 +32,7 @@ export type Letter =
   | 'Space';
 
 export interface KeyDefinition {
+  name?: string;
   keyCode: string;
   letter: Letter;
   label?: string;

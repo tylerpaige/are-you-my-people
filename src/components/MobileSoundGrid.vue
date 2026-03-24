@@ -65,6 +65,7 @@ function onStop(letter: Letter) {
         <div class="relative aspect-square">
           <Key
             :letter="getKeyDefinition(letter).letter"
+            :name="getKeyDefinition(letter).name"
             :label="getKeyDefinition(letter).label || letter"
             :active-plays="getActivePlays(letter)"
             :shift-held="shiftHeld"

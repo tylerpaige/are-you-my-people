@@ -8,6 +8,7 @@ const props = withDefaults(
   defineProps<{
     label: string;
     sublabel?: string;
+    name?: string;
     activePlays?: ActivePlay[];
     letter: Letter;
     disabled?: boolean;
@@ -246,7 +247,7 @@ function onClick(e: MouseEvent) {
     </template>
     <template v-else>
       <div
-        class="relative z-10 flex flex-col items-center"
+        class="relative z-10 flex flex-col items-center h-full"
         :style="{
           opacity: !animateLoading || loadingAnimationStopped ? 1 : 0,
           transition: 'opacity 0.4s ease-out',
@@ -256,14 +257,22 @@ function onClick(e: MouseEvent) {
               : '0s',
         }"
       >
+        <div class="my-auto">
+
+          <span
+            class="font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none"
+            >{{ label }}</span
+          >
+          <span
+            v-if="sublabel && !(shiftHeld && !disabled)"
+            class="truncate text-xs text-gray-500"
+            >{{ sublabel }}</span
+          >
+        </div>
         <span
-          class="font-medium text-gray-800 [font-size:clamp(0.5rem,45cqw,4rem)] leading-none"
-          >{{ label }}</span
-        >
-        <span
-          v-if="sublabel && !(shiftHeld && !disabled)"
-          class="truncate text-xs text-gray-500"
-          >{{ sublabel }}</span
+          v-if="name"
+          class="truncate text-sm text-gray-500 block mt-auto"
+          >{{ name }}</span
         >
       </div>
       <span
