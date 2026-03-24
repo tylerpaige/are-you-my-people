@@ -1,17 +1,23 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+
+const props = withDefaults(
+  defineProps<{ size?: 'small' | 'medium' | 'large'; class?: string }>(),
+  { size: 'medium', class: '' }
+);
+
+const SIZE_CLASSES: Record<'small' | 'medium' | 'large', string> = {
+  small: 'w-full max-w-[6rem] md:max-w-[8rem]',
+  medium: 'w-full max-w-[8rem] md:max-w-[10rem]',
+  large: 'w-full max-w-md md:max-w-xl',
+};
+
+const widthClass = computed(() => SIZE_CLASSES[props.size]);
+</script>
+
 <template>
-  <h1
-    class="font-ranchers mb-4 text-2xl leading-none md:text-4xl md:mb-3 select-none"
-  >
-    <span class="text-blue">Are</span>
-    <span class="text-red text-[2em]">You</span>
-    <br />
-    <span
-      class="text-green inline-block text-[0.7em]"
-      style="position: relative; top: -0.4em"
-    >
-      My
-    </span>
-    <span class="text-yellow"> People?</span>
+  <h1 :class="['mb-4 md:mb-3 block select-none', widthClass, props.class]">
+    <img src="/logo.png" alt="Are You My People?" class="w-full" />
+    <span class="sr-only">Are You My People?</span>
   </h1>
 </template>
-

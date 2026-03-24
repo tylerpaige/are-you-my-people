@@ -7,7 +7,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="relative flex items-center justify-between px-4 pb-4 pt-6"
+    class="relative flex items-center justify-between pb-4 pt-6"
     style="touch-action: manipulation"
   >
     <button

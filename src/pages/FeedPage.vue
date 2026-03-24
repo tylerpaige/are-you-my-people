@@ -162,7 +162,7 @@ onUnmounted(() => {
           </p>
         </Transition>
         <div v-if="!showApplauseFlash" ref="feedLogoEl" class="feed-logo-70s">
-          <Logo />
+          <Logo size="large" />
         </div>
       </div>
     </template>

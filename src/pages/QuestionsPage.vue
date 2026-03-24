@@ -339,7 +339,7 @@ onUnmounted(() => {
       "
     >
       <template #logo>
-        <Logo />
+        <Logo size="medium" />
       </template>
     </QuestionControls>
   </div>

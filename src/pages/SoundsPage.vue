@@ -211,7 +211,7 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-screen bg-brown px-4 py-6 select-none">
-    <Logo />
+    <Logo size="small" />
 
     <!-- Desktop: keyboard -->
     <div class="hidden justify-center md:flex">
