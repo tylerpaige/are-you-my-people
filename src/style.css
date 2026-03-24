@@ -23,12 +23,24 @@
   --animate-applause-blink: applause-blink 0.75s linear infinite;
 
   --color-brown: #4e1d1f;
-  --color-green: #a0dd87;
-  --color-blue: #9bc8e5;
-  --color-red: #f70000;
-  --color-yellow: #faea3e;
+  /* --color-green: #a0dd87; */
+  /* --color-blue: #9bc8e5; */
+  /* --color-red: #f70000; */
+  /* --color-yellow: #faea3e; */
   --color-white: #ebeeb2;
-  --color-orange: #ffa935;
+  /* --color-orange: #ffa935; */
+
+  --color-blue: #4e93ad;
+  --color-gold: #fec500;
+  --color-green: #4acd67;
+  --color-green-yellow: #aabc1b;
+  --color-light-blue: #9ac6d6;
+  --color-maroon: #901962;
+  --color-orange: #ff8300;
+  --color-purple: #7b00e1;
+  --color-red: #f32903;
+  --color-salmon: #ff5648;
+  --color-yellow: #fefc59;
 }
 
 html,

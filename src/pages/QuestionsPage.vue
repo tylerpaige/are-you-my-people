@@ -12,7 +12,11 @@ interface CardColor {
   nextGlow: string;
 }
 const COLORS: CardColor[] = [
-  { background: 'bg-blue', text: 'text-black', nextGlow: 'to-blue' },
+  {
+    background: 'bg-light-blue',
+    text: 'text-brown',
+    nextGlow: 'to-light-blue',
+  },
   { background: 'bg-green', text: 'text-brown', nextGlow: 'to-green' },
   { background: 'bg-yellow', text: 'text-brown', nextGlow: 'to-yellow' },
   { background: 'bg-orange', text: 'text-brown', nextGlow: 'to-orange' },

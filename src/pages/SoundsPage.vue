@@ -264,11 +264,7 @@ onUnmounted(() => {
     <!-- Mobile: fixed bottom dock — pause (when playing), applause, stopwatch -->
     <div
       class="fixed bottom-0 left-0 right-0 z-10 flex flex-col md:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.08)] transition-all duration-500 ease-out"
-      :class="
-        mobileControlsReady
-          ? 'translate-y-0'
-          : 'translate-y-full'
-      "
+      :class="mobileControlsReady ? 'translate-y-0' : 'translate-y-full'"
       style="padding-bottom: env(safe-area-inset-bottom, 0px)"
     >
       <div

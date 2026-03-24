@@ -115,7 +115,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-brown text-white flex flex-col justify-center items-center select-none overflow-hidden"
+    class="min-h-screen bg-purple text-white flex flex-col justify-center items-center select-none overflow-hidden"
   >
     <!-- Commercials / credits -->
     <div
