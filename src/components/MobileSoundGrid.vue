@@ -2,7 +2,11 @@
 import { computed } from 'vue';
 import type { ActivePlay } from '../composables/useSoundboard';
 import Key from './Key.vue';
-import { getKeyDefinition, QWERTY_ROWS, type Letter } from '../lib/config';
+import {
+  getKeyDefinition,
+  MOBILE_SOUNDBOARD_ORDER,
+  type Letter,
+} from '../lib/config';
 
 const props = defineProps<{
   loading: boolean;
@@ -19,17 +23,12 @@ const emit = defineEmits<{
   keysLoadingFinished: [];
 }>();
 
-/** Keys in QWERTY order (row by row), including Space for consistent animation offsets. */
-const lettersInQwertyOrder = computed(() => QWERTY_ROWS.flat());
-
-/** Mobile grid: only keys that have a sound and are not marked hidden. */
+/** Mobile grid: `MOBILE_SOUNDBOARD_ORDER`, keeping only keys that have a sound and are not hidden. */
 const lettersToShow = computed(() =>
-  lettersInQwertyOrder.value
-    .filter((letter) => {
-      const def = getKeyDefinition(letter);
-      return Boolean(def.soundUrl) && !def.hidden;
-    })
-    .reverse()
+  MOBILE_SOUNDBOARD_ORDER.filter((letter) => {
+    const def = getKeyDefinition(letter);
+    return Boolean(def.soundUrl) && !def.hidden;
+  })
 );
 
 function getDelayForLetter(letter: Letter) {

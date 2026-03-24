@@ -80,14 +80,8 @@ export const KEY_CONFIG: KeyConfig = {
   F: {
     ...BARE_KEYS.F,
     label: '😕',
-    name: 'Wah-Wah-Wahhh',
+    name: 'Wah Wahhh',
     soundUrl: '/sounds/wah-wah-wahhh.ogg',
-  },
-  G: {
-    ...BARE_KEYS.G,
-    label: '🤭',
-    name: 'Small laugh',
-    soundUrl: '/sounds/dad-joke.ogg',
   },
   H: {
     ...BARE_KEYS.H,
@@ -110,7 +104,7 @@ export const KEY_CONFIG: KeyConfig = {
   L: {
     ...BARE_KEYS.L,
     label: '💾',
-    name: 'Restaging music',
+    name: 'Restaging',
     soundUrl: '/sounds/copy.ogg',
   },
 
@@ -122,15 +116,15 @@ export const KEY_CONFIG: KeyConfig = {
   },
   V: {
     ...BARE_KEYS.V,
-    label: '🎬🏃🏻',
-    name: 'Theme',
-    soundUrl: '/sounds/dating-show-theme--no-intro.ogg',
+    label: '🎬🐢',
+    name: 'Theme (long)',
+    soundUrl: '/sounds/dating-game-2.ogg',
   },
   B: {
     ...BARE_KEYS.B,
     label: '🎬',
     name: 'Intro Theme',
-    soundUrl: '/sounds/dating-game-2.ogg',
+    soundUrl: '/sounds/dating-show-theme--no-intro.ogg',
   },
 };
 
@@ -143,6 +137,28 @@ export const QWERTY_ROWS: Letter[][] = [
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
   ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
   ['Space'],
+];
+
+/** Mobile sound grid order (left-to-right, top-to-bottom). Only keys with `soundUrl` and not `hidden` are shown. */
+export const MOBILE_SOUNDBOARD_ORDER: Letter[] = [
+  'B',
+  'C',
+  'L',
+  'K',
+  'J',
+  'H',
+  'Y',
+  'R',
+  'O',
+  'I',
+  'T',
+  'A',
+  'S',
+  'F',
+  'U',
+  'P',
+  'Q',
+  'V',
 ];
 
 export function getKeyDefinition(letter: Letter): KeyDefinition {
