@@ -36,6 +36,7 @@ export interface KeyDefinition {
   letter: Letter;
   label?: string;
   soundUrl?: string;
+  hidden?: boolean;
 }
 
 export type KeyConfig = Record<Letter, KeyDefinition>;

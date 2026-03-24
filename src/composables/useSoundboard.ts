@@ -83,6 +83,9 @@ export function useSoundboard() {
           bufferByUrl[soundUrl] = buffer;
           const d = buffer.duration;
           durationsByUrl[soundUrl] = Number.isFinite(d) && d > 0 ? d : 1;
+        })
+        .catch((error) => {
+          console.error(`Failed to preload ${soundUrl}:`, error);
         });
     });
 

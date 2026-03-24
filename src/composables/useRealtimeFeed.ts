@@ -24,7 +24,32 @@ export interface SoundStopEvent {
   timestamp: number;
 }
 
-export type FeedEvent = QuestionChangedEvent | SoundPlayEvent | SoundStopEvent;
+export interface ApplauseEvent {
+  type: 'applause';
+  timestamp: number;
+}
+
+/** Which person (1–5) was marked as having been asked a question. */
+export type QuestionAskSlot = 1 | 2 | 3 | 4 | 5;
+
+export interface QuestionAskIncrementEvent {
+  type: 'question-ask-increment';
+  slot: QuestionAskSlot;
+  timestamp: number;
+}
+
+export interface QuestionAskResetEvent {
+  type: 'question-ask-reset';
+  timestamp: number;
+}
+
+export type FeedEvent =
+  | QuestionChangedEvent
+  | SoundPlayEvent
+  | SoundStopEvent
+  | ApplauseEvent
+  | QuestionAskIncrementEvent
+  | QuestionAskResetEvent;
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as
@@ -73,6 +98,12 @@ function ensureChannel(): RealtimeChannel | null {
 
 const currentQuestionIndex = ref<number | null>(null);
 
+const lastApplauseAt = ref<number | null>(null);
+
+const questionAskCounts = reactive<[number, number, number, number, number]>([
+  0, 0, 0, 0, 0,
+]);
+
 // Track active letters in a reactive record for good reactivity.
 const activeLettersRecord = reactive<Record<Letter, boolean>>(
   {} as Record<Letter, boolean>
@@ -90,6 +121,26 @@ function applySoundPlayLocally(letter: Letter) {
 
 function applySoundStopLocally(letter: Letter) {
   activeLettersRecord[letter] = false;
+}
+
+function applyApplauseLocally() {
+  lastApplauseAt.value = Date.now();
+}
+
+function isQuestionAskSlot(n: number): n is QuestionAskSlot {
+  return n >= 1 && n <= 5 && Number.isInteger(n);
+}
+
+function applyQuestionAskIncrementLocally(slot: QuestionAskSlot) {
+  const i = (slot - 1) as 0 | 1 | 2 | 3 | 4;
+  questionAskCounts[i] += 1;
+}
+
+function applyQuestionAskResetLocally() {
+  for (let i = 0; i < 5; i++) {
+    const idx = i as 0 | 1 | 2 | 3 | 4;
+    questionAskCounts[idx] = 0;
+  }
 }
 
 function subscribeIfNeeded() {
@@ -112,6 +163,23 @@ function subscribeIfNeeded() {
       const data = payload.payload as SoundStopEvent | undefined;
       if (!data || !data.letter) return;
       applySoundStopLocally(data.letter);
+    })
+    .on('broadcast', { event: 'applause' }, (payload) => {
+      const data = payload.payload as ApplauseEvent | undefined;
+      if (!data || data.type !== 'applause') return;
+      applyApplauseLocally();
+    })
+    .on('broadcast', { event: 'question-ask-increment' }, (payload) => {
+      const data = payload.payload as QuestionAskIncrementEvent | undefined;
+      if (!data || data.type !== 'question-ask-increment') return;
+      const slot = data.slot;
+      if (!isQuestionAskSlot(slot)) return;
+      applyQuestionAskIncrementLocally(slot);
+    })
+    .on('broadcast', { event: 'question-ask-reset' }, (payload) => {
+      const data = payload.payload as QuestionAskResetEvent | undefined;
+      if (!data || data.type !== 'question-ask-reset') return;
+      applyQuestionAskResetLocally();
     })
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
@@ -174,10 +242,57 @@ export function useFeedProducer() {
     });
   }
 
+  function publishApplause() {
+    if (!channel) return;
+    const event: ApplauseEvent = {
+      type: 'applause',
+      timestamp: Date.now(),
+    };
+    void channel.send({
+      type: 'broadcast',
+      event: 'applause',
+      payload: event,
+    });
+  }
+
+  function publishQuestionAskIncrement(slot: QuestionAskSlot) {
+    applyQuestionAskIncrementLocally(slot);
+
+    if (!channel) return;
+    const event: QuestionAskIncrementEvent = {
+      type: 'question-ask-increment',
+      slot,
+      timestamp: Date.now(),
+    };
+    void channel.send({
+      type: 'broadcast',
+      event: 'question-ask-increment',
+      payload: event,
+    });
+  }
+
+  function publishQuestionAskReset() {
+    applyQuestionAskResetLocally();
+
+    if (!channel) return;
+    const event: QuestionAskResetEvent = {
+      type: 'question-ask-reset',
+      timestamp: Date.now(),
+    };
+    void channel.send({
+      type: 'broadcast',
+      event: 'question-ask-reset',
+      payload: event,
+    });
+  }
+
   return {
     publishQuestionChanged,
     publishSoundPlay,
     publishSoundStop,
+    publishApplause,
+    publishQuestionAskIncrement,
+    publishQuestionAskReset,
   };
 }
 
@@ -223,5 +338,7 @@ export function useFeedConsumer() {
     currentQuestion,
     activeLettersList,
     activeLetterDefinitions,
+    lastApplauseAt,
+    questionAskCounts,
   };
 }

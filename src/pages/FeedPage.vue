@@ -1,10 +1,32 @@
 <script setup lang="ts">
+import { ref, watch, onUnmounted } from 'vue';
 import Logo from '../components/Logo.vue';
 import { KEY_CONFIG, type Letter } from '../lib/config';
 import { useFeedConsumer } from '../composables/useRealtimeFeed';
 
-const { currentQuestion, activeLetterDefinitions, activeLettersList } =
-  useFeedConsumer();
+const {
+  currentQuestion,
+  activeLetterDefinitions,
+  activeLettersList,
+  lastApplauseAt,
+} = useFeedConsumer();
+
+const showApplauseFlash = ref(false);
+let applauseFlashTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(lastApplauseAt, () => {
+  if (lastApplauseAt.value == null) return;
+  showApplauseFlash.value = true;
+  if (applauseFlashTimer) clearTimeout(applauseFlashTimer);
+  applauseFlashTimer = setTimeout(() => {
+    showApplauseFlash.value = false;
+    applauseFlashTimer = null;
+  }, 2800);
+});
+
+onUnmounted(() => {
+  if (applauseFlashTimer) clearTimeout(applauseFlashTimer);
+});
 
 function getDisplayLabel(letter: Letter) {
   const def = KEY_CONFIG[letter];
@@ -41,6 +63,22 @@ function getDisplayLabel(letter: Letter) {
 
         <!-- Foreground content -->
         <div class="relative z-10 w-full max-w-3xl text-center">
+          <Transition
+            enter-active-class="transition duration-300 ease-out"
+            leave-active-class="transition duration-500 ease-in"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+          >
+            <p
+              v-if="showApplauseFlash"
+              class="mb-4 font-sans text-2xl font-semibold tracking-wide text-yellow md:text-3xl"
+              aria-live="polite"
+            >
+              Applause
+            </p>
+          </Transition>
           <h2 class="mb-3 text-xs font-semibold uppercase tracking-[0.16em]">
             Current question
           </h2>

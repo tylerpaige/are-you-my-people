@@ -1,6 +1,6 @@
 /**
  * Re-encode audio files in public/sounds/ into performant web-friendly formats.
- * Outputs OGG Vorbis (small, widely supported) and MP3 (Safari/legacy) for fast
+ * Outputs OGG Opus (small, widely supported) and MP3 (Safari/legacy) for fast
  * loading and streaming. Use alongside or instead of reencode-sounds-for-web.js
  * (which produces 16-bit PCM WAV for maximum compatibility).
  *
@@ -23,8 +23,8 @@ const SOUNDS_DIR = path.join(__dirname, '..', 'public', 'sounds');
 const SKIP_EXISTING = process.env.SKIP_EXISTING === '1';
 const MONO = process.env.MONO === '1';
 
-// OGG Vorbis: quality 5 = ~160 kbps, good balance of size/quality
-const VORBIS_QUALITY = 5;
+// OGG Opus: libopus (Homebrew ffmpeg often omits libvorbis); 48 kHz required
+const OPUS_BITRATE = '128k';
 // MP3: 128 kbps CBR for predictable size and wide support
 const MP3_BITRATE = '128k';
 
@@ -67,11 +67,11 @@ function encodeOgg(inputPath, outputPath) {
     '-i',
     inputPath,
     '-c:a',
-    'libvorbis',
-    '-q:a',
-    String(VORBIS_QUALITY),
+    'libopus',
+    '-b:a',
+    OPUS_BITRATE,
     '-ar',
-    '44100',
+    '48000',
   ];
   if (MONO) args.push('-ac', '1');
   args.push(out);
@@ -119,7 +119,7 @@ function main() {
   }
 
   console.log(
-    `Re-encoding ${audioFiles.length} file(s) to OGG Vorbis + MP3${MONO ? ' (mono)' : ''}...\n`
+    `Re-encoding ${audioFiles.length} file(s) to OGG Opus + MP3${MONO ? ' (mono)' : ''}...\n`
   );
 
   for (const inputPath of audioFiles) {
@@ -160,7 +160,7 @@ function main() {
     }
   }
 
-  console.log('\nDone. Outputs: .ogg (Vorbis) and .mp3 in', SOUNDS_DIR);
+  console.log('\nDone. Outputs: .ogg (Opus) and .mp3 in', SOUNDS_DIR);
 }
 
 main();

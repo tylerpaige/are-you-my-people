@@ -28,7 +28,11 @@ const AUDIO_EXT = /\.(wav|mp3|ogg|m4a|flac)$/i;
 
 // Re-encode settings per extension (for when we apply the volume filter)
 const ENCODE_MAP = {
-  '.ogg': { codec: 'libvorbis', opts: ['-q:a', '5'], ext: '.ogg' },
+  '.ogg': {
+    codec: 'libopus',
+    opts: ['-b:a', '128k', '-ar', '48000'],
+    ext: '.ogg',
+  },
   '.mp3': { codec: 'libmp3lame', opts: ['-b:a', '128k'], ext: '.mp3' },
   '.wav': { codec: 'pcm_s16le', opts: ['-ar', '44100', '-ac', '2'], ext: '.wav' },
   '.m4a': { codec: 'aac', opts: ['-b:a', '128k'], ext: '.m4a' },
