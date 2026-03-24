@@ -3,10 +3,12 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Keyboard from '../components/Keyboard.vue';
 import MobileSoundGrid from '../components/MobileSoundGrid.vue';
 import Logo from '../components/Logo.vue';
+import FeedModeButtons from '../components/FeedModeButtons.vue';
 import { useSoundboard } from '../composables/useSoundboard';
 import {
   useFeedConsumer,
   useFeedProducer,
+  type FeedDisplayMode,
   type QuestionAskSlot,
 } from '../composables/useRealtimeFeed';
 import {
@@ -31,11 +33,12 @@ const {
 } = useSoundboard();
 const shiftHeld = ref(false);
 
-const { questionAskCounts } = useFeedConsumer();
+const { questionAskCounts, feedDisplayMode } = useFeedConsumer();
 const {
   publishApplause,
   publishQuestionAskIncrement,
   publishQuestionAskReset,
+  publishFeedMode,
 } = useFeedProducer();
 
 const ASK_SLOTS: QuestionAskSlot[] = [1, 2, 3, 4, 5];
@@ -43,6 +46,10 @@ const ASK_SLOTS: QuestionAskSlot[] = [1, 2, 3, 4, 5];
 function onApplauseClick() {
   play('J');
   publishApplause();
+}
+
+function setFeedMode(mode: FeedDisplayMode) {
+  publishFeedMode(mode);
 }
 
 // ---- Mobile stopwatch: total (session) vs this question; incrementing a person laps "this question" ----
@@ -224,6 +231,17 @@ onUnmounted(() => {
         @play="play"
         @stop="handleStop"
       />
+
+      <div
+        class="mx-auto mb-4 mt-16 w-full max-w-3xl text-sm text-yellow/80 leading-tight"
+      >
+        <h2 class="text-md mb-1 font-bold underline">Feed mode</h2>
+        <p class="mb-6">
+          Choose which mode appears on the feed: main show view, commercials, or
+          credits.
+        </p>
+        <FeedModeButtons :mode="feedDisplayMode" @change="setFeedMode" />
+      </div>
     </div>
 
     <!-- Mobile: fixed bottom dock — pause (when playing), applause, stopwatch -->

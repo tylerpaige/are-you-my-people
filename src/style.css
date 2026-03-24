@@ -3,6 +3,8 @@
 /* Viewport width/height ratio: e.g. portrait-ish vs 16:9 and wider */
 @custom-variant orientation-lt-video (@media (max-aspect-ratio: 16/9));
 @custom-variant orientation-gte-video (@media (min-aspect-ratio: 16/9));
+@custom-variant orientation-lt-4-3 (@media (max-aspect-ratio: 4/3));
+@custom-variant orientation-gte-4-3 (@media (min-aspect-ratio: 4/3));
 
 @keyframes applause-blink {
   0%,

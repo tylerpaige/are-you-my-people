@@ -19,7 +19,6 @@ const COLORS: CardColor[] = [
   { background: 'bg-red', text: 'text-white', nextGlow: 'to-red' },
 ];
 
-
 function shuffleQuestions(questions: string[]): string[] {
   const shuffled = [...questions];
   for (let i = shuffled.length - 1; i > 0; i -= 1) {
@@ -50,7 +49,9 @@ const foregroundIndex = computed(() =>
 
 const foregroundQuestion = computed(() =>
   hasQuestions.value
-    ? shuffledQuestions.value[foregroundIndex.value % shuffledQuestions.value.length]
+    ? shuffledQuestions.value[
+        foregroundIndex.value % shuffledQuestions.value.length
+      ]
     : ''
 );
 
@@ -93,13 +94,15 @@ function animateToIndex(
       markAsked(options.sourceIndex);
     }
     currentIndex.value =
-      (targetIndex + shuffledQuestions.value.length) % shuffledQuestions.value.length;
+      (targetIndex + shuffledQuestions.value.length) %
+      shuffledQuestions.value.length;
     displayIndex.value = currentIndex.value;
     return;
   }
 
   const normalizedTarget =
-    (targetIndex + shuffledQuestions.value.length) % shuffledQuestions.value.length;
+    (targetIndex + shuffledQuestions.value.length) %
+    shuffledQuestions.value.length;
 
   isAnimating.value = true;
   direction.value = dir;

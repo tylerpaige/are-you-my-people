@@ -43,13 +43,29 @@ export interface QuestionAskResetEvent {
   timestamp: number;
 }
 
+export interface CommercialBreakEvent {
+  type: 'commercial-break';
+  isOnBreak: boolean;
+  timestamp: number;
+}
+
+export type FeedDisplayMode = 'show' | 'commercials' | 'credits';
+
+export interface FeedModeChangedEvent {
+  type: 'feed-mode-changed';
+  mode: FeedDisplayMode;
+  timestamp: number;
+}
+
 export type FeedEvent =
   | QuestionChangedEvent
   | SoundPlayEvent
   | SoundStopEvent
   | ApplauseEvent
   | QuestionAskIncrementEvent
-  | QuestionAskResetEvent;
+  | QuestionAskResetEvent
+  | CommercialBreakEvent
+  | FeedModeChangedEvent;
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as
@@ -99,6 +115,7 @@ function ensureChannel(): RealtimeChannel | null {
 const currentQuestionIndex = ref<number | null>(null);
 
 const lastApplauseAt = ref<number | null>(null);
+const feedDisplayMode = ref<FeedDisplayMode>('show');
 
 const questionAskCounts = reactive<[number, number, number, number, number]>([
   0, 0, 0, 0, 0,
@@ -143,6 +160,14 @@ function applyQuestionAskResetLocally() {
   }
 }
 
+function isFeedDisplayMode(mode: string): mode is FeedDisplayMode {
+  return mode === 'show' || mode === 'commercials' || mode === 'credits';
+}
+
+function applyFeedModeLocally(mode: FeedDisplayMode) {
+  feedDisplayMode.value = mode;
+}
+
 function subscribeIfNeeded() {
   if (isSubscribed) return;
   const channel = ensureChannel();
@@ -180,6 +205,17 @@ function subscribeIfNeeded() {
       const data = payload.payload as QuestionAskResetEvent | undefined;
       if (!data || data.type !== 'question-ask-reset') return;
       applyQuestionAskResetLocally();
+    })
+    .on('broadcast', { event: 'commercial-break' }, (payload) => {
+      const data = payload.payload as CommercialBreakEvent | undefined;
+      if (!data || data.type !== 'commercial-break') return;
+      applyFeedModeLocally(data.isOnBreak ? 'commercials' : 'show');
+    })
+    .on('broadcast', { event: 'feed-mode-changed' }, (payload) => {
+      const data = payload.payload as FeedModeChangedEvent | undefined;
+      if (!data || data.type !== 'feed-mode-changed') return;
+      if (!isFeedDisplayMode(data.mode)) return;
+      applyFeedModeLocally(data.mode);
     })
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
@@ -286,6 +322,30 @@ export function useFeedProducer() {
     });
   }
 
+  function publishCommercialBreakStart() {
+    publishFeedMode('commercials');
+  }
+
+  function publishCommercialBreakEnd() {
+    publishFeedMode('show');
+  }
+
+  function publishFeedMode(mode: FeedDisplayMode) {
+    applyFeedModeLocally(mode);
+
+    if (!channel) return;
+    const event: FeedModeChangedEvent = {
+      type: 'feed-mode-changed',
+      mode,
+      timestamp: Date.now(),
+    };
+    void channel.send({
+      type: 'broadcast',
+      event: 'feed-mode-changed',
+      payload: event,
+    });
+  }
+
   return {
     publishQuestionChanged,
     publishSoundPlay,
@@ -293,6 +353,9 @@ export function useFeedProducer() {
     publishApplause,
     publishQuestionAskIncrement,
     publishQuestionAskReset,
+    publishCommercialBreakStart,
+    publishCommercialBreakEnd,
+    publishFeedMode,
   };
 }
 
@@ -340,5 +403,6 @@ export function useFeedConsumer() {
     activeLetterDefinitions,
     lastApplauseAt,
     questionAskCounts,
+    feedDisplayMode,
   };
 }
