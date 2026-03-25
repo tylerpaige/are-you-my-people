@@ -35,6 +35,58 @@ const feedLogoEl = ref<HTMLElement | null>(null);
 let feedLogoTimeline: gsap.core.Timeline | null = null;
 let motionMql: MediaQueryList | null = null;
 
+const isFullscreen = ref(false);
+
+function getFullscreenElement(): Element | null {
+  const d = document as Document & {
+    webkitFullscreenElement?: Element | null;
+    mozFullScreenElement?: Element | null;
+    msFullscreenElement?: Element | null;
+  };
+  return (
+    document.fullscreenElement ??
+    d.webkitFullscreenElement ??
+    d.mozFullScreenElement ??
+    d.msFullscreenElement ??
+    null
+  );
+}
+
+function syncFullscreenState() {
+  isFullscreen.value = getFullscreenElement() !== null;
+}
+
+function onFullscreenChange() {
+  syncFullscreenState();
+}
+
+const FULLSCREEN_CHANGE_EVENTS = [
+  'fullscreenchange',
+  'webkitfullscreenchange',
+  'mozfullscreenchange',
+  'MSFullscreenChange',
+] as const;
+
+function requestFeedFullscreen() {
+  const el = document.documentElement;
+  const req =
+    el.requestFullscreen?.bind(el) ??
+    (
+      el as HTMLElement & {
+        webkitRequestFullscreen?: () => void;
+        mozRequestFullScreen?: () => void;
+        msRequestFullscreen?: () => void;
+      }
+    ).webkitRequestFullscreen?.bind(el) ??
+    (
+      el as HTMLElement & { mozRequestFullScreen?: () => void }
+    ).mozRequestFullScreen?.bind(el) ??
+    (
+      el as HTMLElement & { msRequestFullscreen?: () => void }
+    ).msRequestFullscreen?.bind(el);
+  if (req) void Promise.resolve(req()).catch(() => {});
+}
+
 function stopFeedLogoAnim() {
   if (feedLogoTimeline) {
     feedLogoTimeline.kill();
@@ -101,15 +153,32 @@ watch(lastApplauseAt, () => {
 });
 
 onMounted(() => {
+  syncFullscreenState();
+  for (const ev of FULLSCREEN_CHANGE_EVENTS) {
+    document.addEventListener(ev, onFullscreenChange);
+  }
   motionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
   motionMql.addEventListener('change', onReducedMotionChange);
+  void nextTick(() => requestFeedFullscreen());
 });
 
 onUnmounted(() => {
+  for (const ev of FULLSCREEN_CHANGE_EVENTS) {
+    document.removeEventListener(ev, onFullscreenChange);
+  }
   motionMql?.removeEventListener('change', onReducedMotionChange);
   motionMql = null;
   stopFeedLogoAnim();
   if (applauseFlashTimer) clearTimeout(applauseFlashTimer);
+  const exit =
+    document.exitFullscreen?.bind(document) ??
+    (document as Document & { webkitExitFullscreen?: () => void })
+      .webkitExitFullscreen?.bind(document) ??
+    (document as Document & { mozCancelFullScreen?: () => void })
+      .mozCancelFullScreen?.bind(document) ??
+    (document as Document & { msExitFullscreen?: () => void })
+      .msExitFullscreen?.bind(document);
+  if (getFullscreenElement() && exit) void Promise.resolve(exit()).catch(() => {});
 });
 </script>
 
@@ -166,6 +235,16 @@ onUnmounted(() => {
         </div>
       </div>
     </template>
+
+    <button
+      v-show="!isFullscreen"
+      type="button"
+      class="pointer-events-auto fixed bottom-3 right-3 z-100 rounded border border-white/10 bg-black/15 px-2 py-1 text-[10px] font-medium uppercase tracking-widest text-white/25 backdrop-blur-sm transition-colors hover:border-white/15 hover:bg-black/25 hover:text-white/45 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-white/30"
+      aria-label="Enter fullscreen"
+      @click="requestFeedFullscreen"
+    >
+      Fullscreen
+    </button>
   </div>
 </template>
 
